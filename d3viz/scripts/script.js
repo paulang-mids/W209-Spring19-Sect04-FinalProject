@@ -1,102 +1,90 @@
+//Width and height
+  var w = 500;
+  var h = 300;
 
-var margin = {
-    top: 10,
-    bottom: 10,
-    left: 10,
-    right:10
-}, width = parseInt(d3.select('.viz').style('width'))
-    , width = width - margin.left - margin.right
-    , mapRatio = 0.5
-    , height = width * mapRatio
-    , active = d3.select(null);
+  //Define map projection
+  var projection = d3.geoAlbersUsa()
+               .translate([w/2, h/2])
+               .scale([500]);
 
-var svg = d3.select('.viz').append('svg')
-    .attr('class', 'center-container')
-    .attr('height', height + margin.top + margin.bottom)
-    .attr('width', width + margin.left + margin.right);
+  //Define path generator
+  var path = d3.geoPath()
+           .projection(projection);
 
-svg.append('rect')
-    .attr('class', 'background center-container')
-    .attr('height', height + margin.top + margin.bottom)
-    .attr('width', width + margin.left + margin.right)
-    .on('click', clicked);
+  //Define quantize scale to sort data values into buckets of color
+  var color = d3.scaleQuantize()
+            .range(["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
+            //Colors derived from ColorBrewer, by Cynthia Brewer, and included in
+            //https://github.com/d3/d3-scale-chromatic
 
+  //Create SVG element
+  var svg = d3.select("body")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
 
-Promise.resolve(d3.json('../data/us-counties.topojson'))
-    .then(ready);
+  //Load in agriculture data
+  // d3.csv("../data/us-ag-productivity.csv", function(data) {
+  d3.json("../data/alldata.json", function(error, data) {
+    console.log(data);
+    // for (var key in data) {
+    //   console.log(data[key].state);
+    // }
+    //Set input domain for color scale
+    color.domain([
+      d3.min(data, function(d) { return d.value; }),
+      d3.max(data, function(d) { return d.value; })
+    ]);
 
-var projection = d3.geoAlbersUsa()
-    .translate([width /2 , height / 2])
-    .scale(width);
+    //Load in GeoJSON data
+    d3.json("../data/us-states.json", function(json) {
 
-var path = d3.geoPath()
-    .projection(projection);
+      //Merge the ag. data and GeoJSON
+      //Loop through once for each ag. data value
+      for (var i = 0; i < data.length; i++) {
 
-var g = svg.append("g")
-    .attr('class', 'center-container center-items us-state')
-    .attr('transform', 'translate('+margin.left+','+margin.top+')')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
+        //Grab state name
+        var dataState = data[i].state;
 
-function ready(us) {
+        //Grab data value, and convert from string to float
+        var dataValue = parseFloat(data[i].risk2);
 
-    g.append("g")
-        .attr("id", "counties")
-        .selectAll("path")
-        .data(topojson.feature(us, us.objects.counties).features)
-        .enter().append("path")
-        .attr("d", path)
-        .attr("class", "county-boundary")
-        .on("click", reset);
+        //Find the corresponding state inside the GeoJSON
+        for (var j = 0; j < json.features.length; j++) {
 
-    g.append("g")
-        .attr("id", "states")
-        .selectAll("path")
-        .data(topojson.feature(us, us.objects.states).features)
-        .enter().append("path")
-        .attr("d", path)
-        .attr("class", "state")
-        .on("click", clicked);
+          var jsonState = json.features[j].properties.name_abbr;
 
+          if (dataState == jsonState) {
 
-    g.append("path")
-        .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-        .attr("id", "state-borders")
-        .attr("d", path);
+            //Copy the data value into the JSON
+            json.features[j].properties.value = dataValue;
 
-}
+            //Stop looking through the JSON
+            break;
 
-function clicked(d) {
-    if (d3.select('.background').node() === this) return reset();
+          }
+        }
+      }
 
-    if (active.node() === this) return reset();
+      //Bind data and create one path per GeoJSON feature
+      svg.selectAll("path")
+         .data(json.features)
+         .enter()
+         .append("path")
+         .attr("d", path)
+         .style("fill", function(d) {
+            //Get data value
+            var value = d.properties.value;
 
-    active.classed("active", false);
-    active = d3.select(this).classed("active", true);
+            if (value) {
+              //If value exists…
+              return color(value);
+            } else {
+              //If value is undefined…
+              return "#ccc";
+            }
+         });
 
-    var bounds = path.bounds(d),
-        dx = bounds[1][0] - bounds[0][0],
-        dy = bounds[1][1] - bounds[0][1],
-        x = (bounds[0][0] + bounds[1][0]) / 2,
-        y = (bounds[0][1] + bounds[1][1]) / 2,
-        scale = .9 / Math.max(dx / width, dy / height),
-        translate = [width / 2 - scale * x, height / 2 - scale * y];
+    });
 
-    g.transition()
-        .duration(750)
-        .style("stroke-width", 1.5 / scale + "px")
-        .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
-}
-
-
-function reset() {
-    active.classed("active", false);
-    active = d3.select(null);
-
-    g.transition()
-        .delay(100)
-        .duration(750)
-        .style("stroke-width", "1.5px")
-        .attr('transform', 'translate('+margin.left+','+margin.top+')');
-
-}
+  });
