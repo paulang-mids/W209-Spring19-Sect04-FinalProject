@@ -2,6 +2,8 @@
   var w = 500;
   var h = 300;
 
+
+
   //Define map projection
   var projection = d3.geoAlbersUsa()
                .translate([w/2, h/2])
@@ -11,11 +13,7 @@
   var path = d3.geoPath()
            .projection(projection);
 
-  //Define quantize scale to sort data values into buckets of color
-  var color = d3.scaleQuantize()
-            .range(["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
-            //Colors derived from ColorBrewer, by Cynthia Brewer, and included in
-            //https://github.com/d3/d3-scale-chromatic
+  var color = d3.scaleSequential(d3.interpolateBlues)
 
   //Create SVG element
   var svg = d3.select("body")
@@ -26,14 +24,37 @@
   //Load in agriculture data
   // d3.csv("../data/us-ag-productivity.csv", function(data) {
   d3.json("../data/alldata.json", function(error, data) {
-    console.log(data);
-    // for (var key in data) {
-    //   console.log(data[key].state);
+    if (error) throw error;
+
+    // console.log(data);
+    var countyAgg = d3.nest()
+    .key(function(d) { return d.state + d.county; })
+    .rollup(function(v) { return {
+      count: v.length,
+      population: d3.max(v, function(d){ return d.population}),
+      totRisk: d3.mean(v, function(d) { return d.totrisk; }),
+      risk1: d3.mean(v, function(d) { return d.risk1; })
+    }; })
+    .entries(data);
+    // countyAggJson = JSON.stringify(countyAgg);
+    // console.log(JSON.stringify(countyAgg));
+    var stateAgg = d3.nest()
+    .key(function(d) { return d.key.substring(0,2) ; })
+    .rollup(function(v) { return {
+      count: v.length,
+      population: d3.sum(v, function(d){ return parseInt(d.value.population);}),
+      totRisk: d3.mean(v, function(d) { return parseFloat(d.value.totRisk); }),
+      risk1: d3.mean(v, function(d) { return parseFloat(d.value.risk1); })
+    }; })
+    .entries(countyAgg);
+    // console.log(JSON.stringify(stateAgg));
+    // for (var key in countyAggJson) {
+    //   console.log(key, countyAggJson[key].population);
     // }
     //Set input domain for color scale
     color.domain([
-      d3.min(data, function(d) { return d.value; }),
-      d3.max(data, function(d) { return d.value; })
+      d3.min(stateAgg, function(d) { return d.value.totRisk; }),
+      d3.max(stateAgg, function(d) { return d.value.totRisk; })
     ]);
 
     //Load in GeoJSON data
@@ -41,13 +62,14 @@
 
       //Merge the ag. data and GeoJSON
       //Loop through once for each ag. data value
-      for (var i = 0; i < data.length; i++) {
-
+      // for (var i = 0; i < countyAgg.length; i++) {
+      stateAgg.forEach(function(d) {
         //Grab state name
-        var dataState = data[i].state;
-
+        var dataState = d.key;
+        // console.log(dataState);
         //Grab data value, and convert from string to float
-        var dataValue = parseFloat(data[i].risk2);
+        var dataValue = parseFloat(d.value.totRisk);
+        // console.log(dataValue);
 
         //Find the corresponding state inside the GeoJSON
         for (var j = 0; j < json.features.length; j++) {
@@ -64,7 +86,7 @@
 
           }
         }
-      }
+      })
 
       //Bind data and create one path per GeoJSON feature
       svg.selectAll("path")
@@ -74,7 +96,9 @@
          .attr("d", path)
          .style("fill", function(d) {
             //Get data value
+            // var value = d.properties.value/1000000;
             var value = d.properties.value;
+            // console.log(d.properties.name_abbr, value)
 
             if (value) {
               //If value exists…
