@@ -1,7 +1,7 @@
 //Width and height
   var w = 500;
   var h = 300;
-
+  var fmt = d3.format(" >5.2%");
 
 
   //Define map projection
@@ -107,6 +107,17 @@
               //If value is undefined…
               return "#ccc";
             }
+         })
+         .attr("d", path)
+         .append("title")
+         .text(function(d) {
+             var value = d.properties.value,
+                 state = d.properties.name;
+
+             // var msg = d.id;
+             if (value) {var msg = state + "; Total Risk: " + fmt(value);
+             }
+             return msg;
          });
 
     });
