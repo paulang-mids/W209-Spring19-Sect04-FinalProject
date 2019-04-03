@@ -200,13 +200,17 @@ a:active {
     pointer-events: all;
 }
 
-#states {
-    fill: #aaa;
+#states :hover{
+    fill: #0cccf7;
 }
 
-#states .active {
-    display:none;
+#counties :hover{
+    fill: #0cccf7;
 }
+
+/* #states .active {
+    display:none;
+} */
 
 .dropdown {
   margin-top: -20px;
