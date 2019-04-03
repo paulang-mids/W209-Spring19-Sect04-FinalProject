@@ -161,7 +161,7 @@ function updateStateFill(selection) {
 
 function showCounty(fips) {
   stateView = false;
-	var countyFile = "../data/CountyData/" + selRisk + selState + ".csv";
+	var countyFile = "../data/CountyData/" + selRisk + "/" + selRisk + selState + ".csv";
   console.log("in county: ", countyFile);
 
   d3.json("../data/us-counties-full.topojson", function(us) {
@@ -542,7 +542,7 @@ function updateRisk() {
       stateMap.call(updateStateFill(currStateSel));
     });
   } else {
-  	var riskFile = "../data/CountyData/" + selRisk + selState + ".csv";
+  	var riskFile = "../data/CountyData/"  + selRisk + "/" + selRisk + selState + ".csv";
     console.log(riskFile);
     d3.csv(riskFile, function(error, data) {
       if (error) throw error;
