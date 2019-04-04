@@ -116,24 +116,14 @@ a:active {
   color: #2e3d49;
   font-size: 35px;
   padding: 60px;
+  padding-bottom: 0px;
 }
 #mapContainer {
   display: flex;
   flex-direction: row;
   width: 100%;
-  /* justify-content: space-between; */
+  justify-content: space-around;
   flex-wrap: nowrap;
-}
-.child {
-  width: 300px;
-  margin: 0px 90px;
-
-}
-.map {
-
-}
-.bar_chart {
-
 }
 #about {
   background-image: url('../images/cover.jpg');
@@ -190,7 +180,7 @@ a:active {
 #footer p {
   text-align: center;
   color: gray;
-  padding: 15px;
+  padding-top: 10px;
   font-size: 12pt;
 }
 
@@ -207,7 +197,6 @@ a:active {
 #counties :hover{
     fill: #0cccf7;
 }
-
 /* #states .active {
     display:none;
 } */

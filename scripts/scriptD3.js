@@ -260,8 +260,8 @@ function countyZoom() {
 
 function reset(){
   mapG.transition()
-      .delay(100)
-      .duration(750)
+      // .delay(100)
+      .duration(950)
       .style("stroke-width", "1.5px")
       .attr('transform', 'translate('+mapMargin.left+','+mapMargin.top+')');
 }
@@ -348,6 +348,7 @@ function createBar(pollData, data){
     var newRects1 = rects.enter();
 
     newRects1.append('rect')
+              .attr('id', 'mainBars')
               .attr('class', 'bar mainBars')
               .attr('y', function(d, i) {
                 return yScale(d.key) + yScale.bandwidth();
@@ -361,10 +362,14 @@ function createBar(pollData, data){
               .style('fill', '#b3003b')
               .style('stroke', '#80002a')
               .on("mouseover", function(d){
+                d3.select(this).style('fill', '#e600ac')
+                                .style('stroke', '#e600ac');
                 pollHover(d);
                 updatePoll(d.key, data);
               })
               .on("mouseout", function(d){
+                d3.select(this).style('fill', '#b3003b')
+                                .style('stroke', '#80002a');
                 hideTip();
                 resetPoll(data);
               });
@@ -377,7 +382,7 @@ function createBar(pollData, data){
     var brushRects1 = brushRects.enter();
 
     brushRects1.append('rect')
-                .attr('class', 'bar mainBars')
+                .attr('class', 'bar miniBars')
                 .attr('y', function(d, i) {
                   return y2Scale(d.key);
                 })
@@ -447,7 +452,7 @@ function createBar(pollData, data){
       d3.select(".focus")
         .select(".x.axis")
         .transition()
-        .duration(50)
+        .duration(250)
         .call(xAxis);
 
       barSVG.select(".zoom").call(zoom.transform, d3.zoomIdentity
@@ -501,12 +506,12 @@ function hideTip() {
 function pollHover(d) {
   console.log("pollhover: ", d);
     tooltip.transition()
-            .duration(250)
+            .duration(550)
             .style("opacity", 1);
-            tooltip.html(
-            "<p><strong>" + d.key + "</strong></p>" +
-            "<table><tbody>" +
-            "<tr><td>Risk:</td><td>" + d.value.val + "</td></tr></tbody></table>"
+    tooltip.html(
+                "<p><strong>" + d.key + "</strong></p>" +
+                "<table><tbody>" +
+                "<tr><td>Risk:</td><td>" + d.value.val + "</td></tr></tbody></table>"
             )
             .style("left", (d3.event.pageX + 15) + "px")
             .style("top", (d3.event.pageY - 28) + "px");
