@@ -1,8 +1,8 @@
 // Chloropleth Variables
-var mapMargin = {top: 20, bottom: 10, left: 10, right:10}
-    , mapWidth = 600
+var mapMargin = {top: 15, bottom: 10, left: 10, right:0}
+    , mapWidth = 850
     , mapWidth = mapWidth - mapMargin.left - mapMargin.right
-    , mapRatio = 0.5
+    , mapRatio = 0.6
     , mapHeight = mapWidth * mapRatio
     , active = d3.select(null);
 
@@ -13,7 +13,7 @@ var countyAgg, stateAgg, dictCounties, dictState;
 var currStateSel, currCountySel, selStateID, selState, selStateFeature, stateView;
 
 // Bar Variables
-var barMargin = {top: 10, right: 10, bottom: 30, left: 225}
+var barMargin = {top: 10, right: 10, bottom: 30, left: 200}
     , barMargin2 = {top: 10, right: 10, bottom: 30, left: 10}
     , barWidth = 550 - barMargin.left - barMargin.right
     , barHeight = 400 - barMargin.top - barMargin.bottom
@@ -153,8 +153,10 @@ function updateStateFill(selection) {
                 if (value) {
                   return mapColor(value);
                 } else {
-                  return mapColor(0);
+                  return "grey";
                 }
+            } else {
+              return "grey";
             }
            });
 }
@@ -238,7 +240,7 @@ function updateCountyFill(selection) {
                 return mapColor(value);
               }
               else {
-                return mapColor(0);
+                return "grey";
               }
            });
 }
@@ -248,9 +250,16 @@ function countyZoom() {
       dx = bounds[1][0] - bounds[0][0],
       dy = bounds[1][1] - bounds[0][1],
       x = (bounds[0][0] + bounds[1][0]) / 2,
-      y = (bounds[0][1] + bounds[1][1]) / 2,
-      scale = .9 / Math.max(dx / mapWidth, dy / mapHeight),
-      translate = [mapWidth / 2 - scale * x, mapHeight / 2 - scale * y];
+      y = (bounds[0][1] + bounds[1][1]) / 2;
+      if (selState == 'AK' || selState == 'HI') {
+        var scale = .65 / Math.max(dx / mapWidth, dy / mapHeight),
+        translate = [mapWidth / 3.5 - scale * x, mapHeight / 3.5 - scale * y];
+      }
+      else {
+        var scale = .8 / Math.max(dx / mapWidth, dy / mapHeight),
+        translate = [mapWidth / 2 - scale * x, mapHeight / 2 - scale * y];
+      }
+        console.log(selState, translate);
 
   mapG.transition()
       .duration(2000)
@@ -362,8 +371,8 @@ function createBar(pollData, data){
               .style('fill', '#b3003b')
               .style('stroke', '#80002a')
               .on("mouseover", function(d){
-                d3.select(this).style('fill', '#e600ac')
-                                .style('stroke', '#e600ac');
+                d3.select(this).style('fill', '#ff6699')
+                                .style('stroke', '#ff6699');
                 pollHover(d);
                 updatePoll(d.key, data);
               })
