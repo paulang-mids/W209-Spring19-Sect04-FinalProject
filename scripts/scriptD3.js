@@ -206,7 +206,9 @@ function showCounty(fips) {
               })
           .on("mouseover", function(d) {
             countyFips = d.properties.fips;
+            console.log(countyFips);
             countyDataFil = data.filter(function (d){return d.fips==countyFips});
+            console.log(countyDataFil);
             d3.select(".bar_chart").select("svg").remove();
             getPollData(countyDataFil);
             createBar(pollData, data);
@@ -234,7 +236,7 @@ function updateCountyFill(selection) {
            .duration(700)
            .attr("fill", function(d) {
              // console.log("county d: ",d, parseInt(d.properties.fips), dictCounties[parseInt(d.properties.fips)]);
-             countyObj = dictCounties[parseInt(d.properties.fips)];
+             countyObj = dictCounties[d.properties.fips];
              if (countyObj) {
                 var value = countyObj.value.val;
                 return mapColor(value);
@@ -491,7 +493,7 @@ function stateHover(d) {
 }
 
 function countyHover(d) {
-  var countyObj = dictCounties[parseInt(d.properties.fips)];
+  var countyObj = dictCounties[d.properties.fips];
   if (countyObj) {
    tooltip.transition()
            .duration(250)
