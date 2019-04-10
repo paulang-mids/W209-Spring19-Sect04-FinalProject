@@ -188,7 +188,7 @@ function showCounty(fips) {
       console.log(dictCounties);
 
       countyMap = mapG.append("g");
-  //
+
       countyMap.attr("id", "counties")
               .selectAll("path")
               .data(topojson.feature(us, us.objects.collection).features.filter(function(d) {return d.properties.state_fips == fips;}))
