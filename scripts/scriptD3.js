@@ -206,9 +206,7 @@ function showCounty(fips) {
               })
           .on("mouseover", function(d) {
             countyFips = d.properties.fips;
-            console.log(countyFips);
             countyDataFil = data.filter(function (d){return d.fips==countyFips});
-            console.log(countyDataFil);
             d3.select(".bar_chart").select("svg").remove();
             getPollData(countyDataFil);
             createBar(pollData, data);
