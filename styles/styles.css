@@ -263,3 +263,56 @@ a:active {
   fill: none;
   pointer-events: all;
 }
+
+@media only screen and (max-width: 750px) {
+  body {
+    width: 100%;
+  }
+  .topBar li {
+    margin: 0 3%;
+    font-size: 12pt;
+  }
+  .coverImage {
+    height: 85vh;
+  }
+  .coverTitle {
+    font-size: 30px;
+    padding: 220px 10px 10px 10px;
+  }
+  .coverCaption {
+    font-size: 18px;
+  }
+  #concept {
+    height: auto;
+  }
+  #conceptContainer {
+    flex-direction: column;
+    justify-content: center;
+    margin: 3%;
+  }
+  .conceptDivs {
+    width: 300px;
+    margin: 3% auto;
+  }
+  #visualization {
+    height: auto;
+  }
+  #mapContainer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .dropdown {
+    width: 80%;
+  }
+  #about {
+    height:auto;
+  }
+  .aboutContainer {
+    flex-direction: column;
+    justify-content: center;
+    margin: 3%;
+  }
+  .aboutDetails {
+    margin: 3% auto;
+  }
+}
