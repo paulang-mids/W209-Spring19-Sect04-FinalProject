@@ -188,7 +188,7 @@ function showCounty(fips) {
       console.log(dictCounties);
 
       countyMap = mapG.append("g");
-  //
+
       countyMap.attr("id", "counties")
               .selectAll("path")
               .data(topojson.feature(us, us.objects.collection).features.filter(function(d) {return d.properties.state_fips == fips;}))
@@ -234,7 +234,7 @@ function updateCountyFill(selection) {
            .duration(700)
            .attr("fill", function(d) {
              // console.log("county d: ",d, parseInt(d.properties.fips), dictCounties[parseInt(d.properties.fips)]);
-             countyObj = dictCounties[parseInt(d.properties.fips)];
+             countyObj = dictCounties[d.properties.fips];
              if (countyObj) {
                 var value = countyObj.value.val;
                 return mapColor(value);
@@ -491,7 +491,7 @@ function stateHover(d) {
 }
 
 function countyHover(d) {
-  var countyObj = dictCounties[parseInt(d.properties.fips)];
+  var countyObj = dictCounties[d.properties.fips];
   if (countyObj) {
    tooltip.transition()
            .duration(250)
