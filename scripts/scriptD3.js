@@ -8,24 +8,30 @@ var mapMargin = {top: 15, bottom: 10, left: 10, right:0}
 
 var errorCount = 0;
 
-var mapSVG, mapColor, mapG, countyMap, stateMap;
-var countyAgg, stateAgg, dictCounties, dictState;
-var currStateSel, currCountySel, selStateID, selState, selStateFeature, stateView;
+var mapSVG, mapColor, mapTitle, mapG, countyMap, stateMap;
+var countyData, stateData, countyAgg, stateAgg, dictCounties, dictState;
 
 // Bar Variables
-var barMargin = {top: 10, right: 10, bottom: 30, left: 200}
+var barMargin = {top: 20, right: 10, bottom: 60, left: 200}
     , barMargin2 = {top: 10, right: 10, bottom: 30, left: 10}
     , barWidth = 550 - barMargin.left - barMargin.right
-    , barHeight = 400 - barMargin.top - barMargin.bottom
+    , barHeight = 450 - barMargin.top - barMargin.bottom
     , barWidth2 = 100 - barMargin2.left - barMargin2.right;
 
-var barSVG,focus,context,
+var barSVG, barTitle, focus,context,
     textScale,xScale,x2Scale,yScale,y2Scale,
     xAxis,yAxis,yAxis2,
     brushExtent, pollData;
 
+//Click and Hover control variables
+var currStateSel, currCountySel, selStateID, selState="", selCounty, selCountyPath, selCountyColor, selStateFeature, stateView, selPollBar, selPoll;
+var countyClickSelFil;
+var countyClick = false,
+    countyLoad = false,
+    pollClick = false;
+
 //Common Variables
-var selRisk = "totrisk";
+var selRisk = "totrisk", selRiskString = "Total Cancer Risk";
 
 // Chloropleth Elements
 mapSVG = d3.select('.map').append('svg')
@@ -35,59 +41,77 @@ mapSVG = d3.select('.map').append('svg')
 
 mapColor = d3.scaleSequential(d3.interpolateBlues);
 
+//Chloropleth Title
+mapTitle = mapSVG.append('text')
+                  .attr("class", "chartTitle")
+                  .attr('transform', 'translate('+(mapMargin.left+mapWidth * 0.2)+','+(mapMargin.top + (mapWidth * .04))+')')
+                  .text(selRiskString + " Assessment")
+
 mapSVG.append('rect')
-.attr('class', 'background center-container')
-.attr('height', mapHeight + mapMargin.top + mapMargin.bottom)
-.attr('width', mapWidth + mapMargin.left + mapMargin.right);
+      .attr('class', 'background center-container')
+      .attr('height', mapHeight + mapMargin.top + mapMargin.bottom)
+      .attr('width', mapWidth + mapMargin.left + mapMargin.right);
 
 mapG = mapSVG.append("g")
-  .attr('class', 'center-container center-items us-state')
-  .attr('transform', 'translate('+mapMargin.left+','+mapMargin.top+')')
-  .attr('width', mapWidth + mapMargin.left + mapMargin.right)
-  .attr('height', mapHeight + mapMargin.top + mapMargin.bottom);
+              .attr('class', 'center-container center-items us-state')
+              .attr('transform', 'translate('+mapMargin.left+','+mapMargin.top+')')
+              .attr('width', mapWidth + mapMargin.left + mapMargin.right)
+              .attr('height', mapHeight + mapMargin.top + mapMargin.bottom);
 
 var projection = d3.geoAlbersUsa()
-    .translate([mapWidth /2 , mapHeight / 2])
-    .scale(mapWidth);
+                    .translate([mapWidth /2 , mapHeight / 2])
+                    .scale(mapWidth);
 
 var path = d3.geoPath()
-    .projection(projection);
+              .projection(projection);
 
 //Common Elements
 var tooltip = d3.select("body").append("div")
-	.attr("class", "tooltip")
-	.style("opacity", 0);
+              	.attr("class", "tooltip")
+              	.style("opacity", 0);
 
 //Dropdown selection
 var riskDropdown = d3.select("#risk_options");
 // populate drop-down
-riskDropdown.on("change", updateRisk)
-            .selectAll("option")
-            .data(risks)
-            .enter()
-            .append("option")
-            .attr("value", function(option) { return option.value; })
-            .text(function(option) { return option.text; });
+riskDropdown.on("change", updateRisk);
+            // .selectAll("option")
+            // .data(risks)
+            // .enter()
+            // .append("option")
+            // .attr("value", function(option) { return option.value; })
+            // .text(function(option) { return option.text; });
 
 showStates();
 
 function showStates() {
   stateView = true;
   var stateFile = "../data/StateData/" + selRisk + ".csv";
-  console.log("in state: ", stateFile);
+  // console.log("in state: ", stateFile);
   d3.json("../data/us-counties.topojson", function(us) {
       d3.csv(stateFile, function(error, data) {
         if (error) throw error;
-        console.log(data);
-        console.log(us);
+        // console.log(data);
+        // console.log(us);
+        stateData = data;
 
-        stateAgg = d3.nest()
-                      .key(function(d) { return d.id ; })
-                      .rollup(function(v) { return {
-                        state: d3.max(v, function(d){ return d.state; }),
-                        val: d3.mean(v, function(d) { return parseFloat(d.val); })
-                      }; })
-                      .entries(data);
+        if (pollClick) {
+          pollDataFil = data.filter(function (d){return d.pollutant==selPoll});
+          stateAgg = d3.nest()
+                        .key(function(d) { return d.id ; })
+                        .rollup(function(v) { return {
+                          state: d3.max(v, function(d){ return d.state; }),
+                          val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                        }; })
+                        .entries(pollDataFil);
+        } else {
+          stateAgg = d3.nest()
+                        .key(function(d) { return d.id ; })
+                        .rollup(function(v) { return {
+                          state: d3.max(v, function(d){ return d.state; }),
+                          val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                        }; })
+                        .entries(data);
+        }
         // console.log(JSON.stringify(stateAgg));
 
         //create objects with state id and data as key-value pairs
@@ -95,7 +119,7 @@ function showStates() {
         stateAgg.forEach(function(d) {
             dictStates[d.key] = d;
         });
-        console.log(dictStates);
+        // console.log(dictStates);
 
         stateMap = mapG.append("g");
 
@@ -111,24 +135,37 @@ function showStates() {
                 .on("click", function(d){
                   selStateID = d.id;
                   selState = dictStates[d.id].value.state;
+                  if (pollClick) {
+                    mapTitle.text(selRiskString + ' Assessment for ' + selPoll + ' in '+ selState);
+                  } else {
+                    mapTitle.text(selRiskString + ' Assessment for ' + selState);
+                  }
                   selStateFeature = d;
                   d3.select("#states").remove();
                   hideTip();
                   showCounty(selStateID);
                   countyZoom();
+                  d3.selectAll("button.state_reset").style("display", "inline-block");
+                  // d3.select(".state_reset").classed("state_reset", false)
+                  //     .transition().duration(50);
+                  setTimeout(setCountyLoadStatus, 1000);
                 })
                 .on("mouseover", function(d){
                   selStateID = d.id;
                   stateDataFil = data.filter(function (d){return d.id==selStateID});
-                  d3.select(".bar_chart").select("svg").remove();
-                  getPollData(stateDataFil);
-                  createBar(pollData, data);
+                  if (!pollClick) {
+                    d3.select(".bar_chart").select("svg").remove();
+                    getPollData(stateDataFil);
+                    createBar(pollData, data);
+                  }
                   stateHover(d);
                 })
                 .on("mouseout", function(d) {
-                  d3.select(".bar_chart").select("svg").remove();
-                  getPollData(data);
-                  createBar(pollData, data);
+                  if (!pollClick) {
+                    d3.select(".bar_chart").select("svg").remove();
+                    getPollData(data);
+                    createBar(pollData, data);
+                  }
                   hideTip();
                 });
 
@@ -145,7 +182,7 @@ function updateStateFill(selection) {
   mapColor.domain([d3.min(stateAgg, function(d) { return d.value.val; }),
                 d3.max(stateAgg, function(d) { return d.value.val; })]);
   selection.transition()
-           .duration(700)
+           .duration(100)
            .attr("fill", function(d) {
              if (dictStates[d.id]) {
                 var value = dictStates[d.id].value.val;
@@ -164,12 +201,13 @@ function updateStateFill(selection) {
 function showCounty(fips) {
   stateView = false;
 	var countyFile = "../data/CountyData/" + selRisk + "/" + selRisk + selState + ".csv";
-  console.log("in county: ", countyFile);
+  // console.log("in county: ", countyFile);
 
   d3.json("../data/us-counties-full.topojson", function(us) {
     d3.csv(countyFile, function(error, data) {
       if (error) throw error;
-      console.log(data);
+      // console.log(data);
+      countyData = data;
 
       countyAgg = d3.nest()
                     .key(function(d) { return d.fips; })
@@ -185,7 +223,7 @@ function showCounty(fips) {
       countyAgg.forEach(function(d) {
           dictCounties[d.key] = d;
       });
-      console.log(dictCounties);
+      // console.log(dictCounties);
 
       countyMap = mapG.append("g");
 
@@ -197,31 +235,71 @@ function showCounty(fips) {
               .attr("d", path)
               .attr("class", "county")
               .attr("fill", "#b3b3b3")
+              // .attr("stroke", "none")
+              // .attr("stroke-width", 0)
               .call(updateCountyFill)
               .on("click", function(d){
-                d3.select("#counties").remove();
-                hideTip();
-                showStates();
-                reset();
-              })
-          .on("mouseover", function(d) {
-            countyFips = d.properties.fips;
-            countyDataFil = data.filter(function (d){return d.fips==countyFips});
-            d3.select(".bar_chart").select("svg").remove();
-            getPollData(countyDataFil);
-            createBar(pollData, data);
-            countyHover(d);
-          })
-          .on("mouseout", function(d) {
-            d3.select(".bar_chart").select("svg").remove();
-            getPollData(data);
-            createBar(pollData, data);
-            hideTip();
-          });
+                if (!pollClick) {
+                  if (selCountyPath) {
+                    d3.select(selCountyPath).style("fill", selCountyColor);
+                  }
 
-      d3.select(".bar_chart").select("svg").remove();
-      getPollData(data);
-      createBar(pollData, data);
+                  countyClick = true;
+                  selCountyPath = this;
+                  selCountyColor = d3.select(this).style("fill");
+                  d3.selectAll("button.county_reset").style("display", "inline-block");
+                  d3.select(this).style("fill", "#0cccf7")
+                                  // .style("stroke", "#057a94")
+                                  // .style("stroke-width", 0.5)
+                                  ;
+                  countyFips = d.properties.fips;
+                  selCounty = dictCounties[d.properties.fips].value.county;
+                  mapTitle.text(selRiskString + " Assessment for " + selCounty + ", " + selState);
+                  countyDataFil = data.filter(function (d){return d.fips==countyFips});
+                  countyClickSelFil = countyDataFil;
+                  if (!pollClick) {
+                    d3.select(".bar_chart").select("svg").remove();
+                    getPollData(countyDataFil);
+                    createBar(pollData, data);
+                  }
+                }
+              })
+              .on("mouseover", function(d) {
+                if (countyLoad) {
+                  selCountyColor = d3.select(this).style("fill");
+                  d3.select(this).style("fill", "#0cccf7");
+                }
+                countyFips = d.properties.fips;
+                countyDataFil = data.filter(function (d){return d.fips==countyFips});
+                if (!pollClick) {
+                  d3.select(".bar_chart").select("svg").remove();
+                  getPollData(countyDataFil);
+                  createBar(pollData, data);
+                }
+                countyHover(d);
+              })
+              .on("mouseout", function(d) {
+                if (countyLoad) {
+                  d3.select(this).style("fill", selCountyColor);
+                }
+                if (!pollClick) {
+                  d3.select(".bar_chart").select("svg").remove();
+                  if (countyClick) {
+                    getPollData(countyClickSelFil);
+                    createBar(pollData, data);
+                  } else {
+                    getPollData(data);
+                    createBar(pollData, data);
+                  }
+                }
+                hideTip();
+              });
+
+      if (!pollClick) {
+        d3.select(".bar_chart").select("svg").remove();
+        getPollData(data);
+        createBar(pollData, data);
+      }
     })
   });
 }
@@ -231,7 +309,7 @@ function updateCountyFill(selection) {
   mapColor.domain([d3.min(countyAgg, function(d) { return d.value.val; }),
                 d3.max(countyAgg, function(d) { return d.value.val; })]);
   selection.transition()
-           .duration(700)
+           .duration(100)
            .attr("fill", function(d) {
              // console.log("county d: ",d, parseInt(d.properties.fips), dictCounties[parseInt(d.properties.fips)]);
              countyObj = dictCounties[d.properties.fips];
@@ -253,26 +331,52 @@ function countyZoom() {
       y = (bounds[0][1] + bounds[1][1]) / 2;
       if (selState == 'AK' || selState == 'HI') {
         var scale = .65 / Math.max(dx / mapWidth, dy / mapHeight),
-        translate = [mapWidth / 3.5 - scale * x, mapHeight / 3.5 - scale * y];
+        translate = [mapWidth / 3.5 - scale * x, (mapHeight / 3.5 - scale * y) + (mapWidth * .085)];
       }
       else {
         var scale = .8 / Math.max(dx / mapWidth, dy / mapHeight),
-        translate = [mapWidth / 2 - scale * x, mapHeight / 2 - scale * y];
+        translate = [mapWidth / 2 - scale * x, (mapHeight / 2 - scale * y) + (mapHeight * .06)];
       }
-        console.log(selState, translate);
+        // console.log(selState, translate);
 
   mapG.transition()
-      .duration(2000)
+      .duration(1000)
       .style("stroke-width", 1.5 / scale + "px")
       .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
 }
 
-function reset(){
-  mapG.transition()
-      // .delay(100)
-      .duration(950)
+function resetState(){
+    d3.selectAll("button.state_reset").style("display", "none");
+    d3.selectAll("button.county_reset").style("display", "none");
+    selState="";
+    d3.select("#counties").remove();
+    if (pollClick) {
+      mapTitle.text(selRiskString + " Assessment for " + selPoll);
+    } else {
+      mapTitle.text(selRiskString + " Assessment");
+    }
+    countyClick = false;
+    countyLoad = false;
+    hideTip();
+    showStates();
+    mapG.transition()
+      .delay(50)
+      .duration(550)
       .style("stroke-width", "1.5px")
       .attr('transform', 'translate('+mapMargin.left+','+mapMargin.top+')');
+}
+
+function resetCounty() {
+  countyClick = false;
+  d3.selectAll("button.county_reset").style("display", "none");
+  d3.select("#counties").remove();
+  if (pollClick) {
+    mapTitle.text(selRiskString + " Assessment for " + selPoll + " in " + selState);
+  } else {
+    mapTitle.text(selRiskString + ' Assessment for ' + selState);
+  }
+  showCounty(selStateID);
+  countyZoom();
 }
 
 function getPollData(data) {
@@ -291,13 +395,26 @@ function createBar(pollData, data){
                 .attr("width", barWidth + barMargin.left + barMargin.right + barWidth2 + barMargin2.left + barMargin2.right)
                 .attr("height", barHeight + barMargin.top + barMargin.bottom);
 
+    //Chloropleth Title
+    barTitle = barSVG.append('text')
+                      .attr("class", "chartTitle")
+                      .attr('transform', 'translate('+(barMargin.left - 60) + "," + (barMargin.top) +')');
+
+    if (stateView) {
+      barTitle.text("Pollutant Levels");
+    } else if (countyClick) {
+      barTitle.text("Pollutant Levels for " + selCounty + ", " + selState);
+    } else {
+      barTitle.text('Pollutant Levels for ' + selState);
+    }
+
     focus = barSVG.append("g")
-                  .attr("transform", "translate(" + barMargin.left + "," + barMargin.top + ")")
+                  .attr("transform", "translate(" + (barMargin.left) + "," + (barMargin.top + 40) + ")")
                   .attr("class","focus");
 
     context = barSVG.append("g")
                     .attr("class", "context")
-                    .attr("transform", "translate(" + (barMargin.left + barWidth + barMargin.right + barMargin2.left) + "," + barMargin2.top + ")");
+                    .attr("transform", "translate(" + (barMargin.left + barWidth + barMargin.right + barMargin2.left) + "," + (barMargin2.top + 40) + ")");
 
     textScale = d3.scaleLinear()
                   .domain([8,75])
@@ -310,7 +427,7 @@ function createBar(pollData, data){
     y2Scale = d3.scaleBand().range([0, barHeight]).paddingInner(0.4);
 
     //Create x axis object
-    xAxis = d3.axisBottom(xScale),
+    xAxis = d3.axisBottom(xScale).ticks(5),
     yAxis = d3.axisLeft(yScale).tickSize(0).tickSizeOuter(0),
     yAxis2 = d3.axisLeft(y2Scale);
 
@@ -370,17 +487,49 @@ function createBar(pollData, data){
               .attr('opacity', 0.85)
               .style('fill', '#b3003b')
               .style('stroke', '#80002a')
+              // .attr("text", "test")
+              .on("click", function(d) {
+                if (!countyClick) {
+                  if (pollClick) {
+                    d3.select(selPollBar).style("fill", '#b3003b')
+                                        .style('stroke', '#80002a');
+                  }
+                  pollClick = true;
+                  selPollBar = this;
+                  selPoll = d.key;
+                  if (selState.length > 0) {
+                    mapTitle.text(selRiskString + ' Assessment for ' + selPoll + ' in '+ selState);
+                  } else if (!countyClick){
+                    mapTitle.text(selRiskString + " Assessment for " + selPoll);
+                  }
+                  d3.selectAll("button.poll_reset").style("display", "inline-block");
+                  d3.select(this).style('fill', '#ff6699')
+                                  .style('stroke', '#ff6699');
+                  updatePoll(selPoll, data);
+                }
+              })
               .on("mouseover", function(d){
                 d3.select(this).style('fill', '#ff6699')
                                 .style('stroke', '#ff6699');
                 pollHover(d);
-                updatePoll(d.key, data);
+                //Update chloropleth only if there is no county selection
+                if (!countyClick) {
+                  updatePoll(d.key, data);
+                }
               })
               .on("mouseout", function(d){
                 d3.select(this).style('fill', '#b3003b')
                                 .style('stroke', '#80002a');
                 hideTip();
-                resetPoll(data);
+                if (pollClick) {
+                  d3.select(selPollBar).style('fill', '#ff6699')
+                                        .style('stroke', '#ff6699');
+                  updatePoll(selPoll, data);
+                }
+                if (!countyClick) {
+                //Update chloropleth only if there is no county selection
+                  resetPoll();
+                }
               });
 
     var focus_group = context.append("g").attr("clip-path", "url(#clip)");
@@ -471,6 +620,13 @@ function createBar(pollData, data){
 
     function zoomed() {
     }
+
+    //Highlight the selected pollutant bar after redraw
+    if (pollClick) {
+      d3.selectAll(".mainBars").filter(function(d) {
+        return d.key == selPoll;
+      }).style("fill", '#ff6699').style('stroke', '#ff6699');
+    }
 }
 
 function stateHover(d) {
@@ -513,28 +669,34 @@ function hideTip() {
 }
 
 function pollHover(d) {
-  console.log("pollhover: ", d);
+  // console.log("pollhover: ", d);
     tooltip.transition()
             .duration(550)
             .style("opacity", 1);
     tooltip.html(
                 "<p><strong>" + d.key + "</strong></p>" +
                 "<table><tbody>" +
-                "<tr><td>Risk:</td><td>" + d.value.val + "</td></tr></tbody></table>"
+                "<tr><td>Pollutant Level:</td><td>" + d.value.val + "</td></tr></tbody></table>"
             )
             .style("left", (d3.event.pageX + 15) + "px")
             .style("top", (d3.event.pageY - 28) + "px");
 }
 
 function updateRisk() {
-  console.log("In Update");
-  selRisk = this.value
+  // console.log("In Update");
+  selRisk = this.value;
+  selRiskString = this[this.selectedIndex].text;
   if (stateView) {
+    if (pollClick) {
+      mapTitle.text(selRiskString + ' Assessment for ' + selPoll);
+    } else {
+      mapTitle.text(selRiskString + ' Assessment');
+    }
   	var riskFile = "../data/StateData/" + selRisk + ".csv";
-    console.log(riskFile);
+    // console.log(riskFile);
     d3.csv(riskFile, function(error, data) {
       if (error) throw error;
-      console.log(data);
+      // console.log(data);
       stateAgg = d3.nest()
                     .key(function(d) { return d.id ; })
                     .rollup(function(v) { return {
@@ -556,11 +718,24 @@ function updateRisk() {
       stateMap.call(updateStateFill(currStateSel));
     });
   } else {
+    if (pollClick) {
+      if (countyClick) {
+        mapTitle.text(selRiskString + ' Assessment for ' + selPoll + ' in '+ selCounty + ", " + selState);
+      } else {
+        mapTitle.text(selRiskString + ' Assessment for ' + selPoll + ' in '+ selState);
+      }
+    } else {
+      if (countyClick) {
+        mapTitle.text(selRiskString + " Assessment for " + selCounty + ", " + selState);
+      } else {
+        mapTitle.text(selRiskString + " Assessment for " + selState);
+      }
+    }
   	var riskFile = "../data/CountyData/"  + selRisk + "/" + selRisk + selState + ".csv";
-    console.log(riskFile);
+    // console.log(riskFile);
     d3.csv(riskFile, function(error, data) {
       if (error) throw error;
-      console.log(data);
+      // console.log(data);
       countyAgg = d3.nest()
                     .key(function(d) { return d.fips; })
                     .rollup(function(v) { return {
@@ -585,10 +760,11 @@ function updateRisk() {
 }
 
 function updatePoll(pollName, data) {
-  console.log("In Poll Update: ", pollName);
-	console.log(data);
-  pollDataFil = data.filter(function (d){return d.pollutant==pollName});
+  // console.log("In Poll Update: ", pollName);
+	// console.log(data);
+  // pollDataFil = data.filter(function (d){return d.pollutant==pollName});
   if (stateView) {
+    pollDataFil = stateData.filter(function (d){return d.pollutant==pollName});
     stateAgg = d3.nest()
                   .key(function(d) { return d.id ; })
                   .rollup(function(v) { return {
@@ -606,6 +782,7 @@ function updatePoll(pollName, data) {
     // console.log(dictStates);
     stateMap.call(updateStateFill(currStateSel));
   } else {
+    pollDataFil = countyData.filter(function (d){return d.pollutant==pollName});
     countyAgg = d3.nest()
                   .key(function(d) { return d.fips; })
                   .rollup(function(v) { return {
@@ -625,42 +802,69 @@ function updatePoll(pollName, data) {
   }
 }
 
-function resetPoll(data) {
-  console.log("In Poll Reset: ");
-	console.log(data);
-  if (stateView) {
-    stateAgg = d3.nest()
-                  .key(function(d) { return d.id ; })
-                  .rollup(function(v) { return {
-                  state: d3.max(v, function(d){ return d.state; }),
-                  val: d3.mean(v, function(d) { return parseFloat(d.val); })
-                  }; })
-                  .entries(data);
-    // console.log(JSON.stringify(stateAgg));
-    //
-    //create objects with state id and data as key-value pairs
-    dictStates = {};
-    stateAgg.forEach(function(d) {
-      dictStates[d.key] = d;
-    });
-    // console.log(dictStates);
-    stateMap.call(updateStateFill(currStateSel));
+function resetPollClick() {
+  pollClick = false;
+  d3.selectAll("button.poll_reset").style("display", "none");
+  d3.selectAll(".mainBars").filter(function(d) {
+    return d.key == selPoll;
+  }).style("fill", '#b3003b').style('stroke', '#80002a');
+  if (selState.length > 0) {
+    mapTitle.text(selRiskString + ' Assessment for ' + selState);
   } else {
-    countyAgg = d3.nest()
-                  .key(function(d) { return d.fips; })
-                  .rollup(function(v) { return {
-                    county: d3.max(v, function(d){ return d.county; }),
-                    val: d3.mean(v, function(d) { return d.val; })
-                  }; })
-                  .entries(data);
-    // console.log(JSON.stringify(countyAgg));
-    //
-    //create objects with state id and data as key-value pairs
-    dictCounties = {};
-    countyAgg.forEach(function(d) {
-        dictCounties[d.key] = d;
+    mapTitle.text(selRiskString + ' Assessment');
+  }
+  resetPoll();
+}
+
+function resetPoll() {
+    console.log("In Poll Reset: ");
+    if (stateView) {
+      if (pollClick) {
+        pollDataFil = stateData.filter(function (d){return d.pollutant==selPoll});
+      } else {
+        pollDataFil = stateData;
+      }
+      stateAgg = d3.nest()
+                    .key(function(d) { return d.id ; })
+                    .rollup(function(v) { return {
+                    state: d3.max(v, function(d){ return d.state; }),
+                    val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                    }; })
+                    .entries(pollDataFil);
+      // console.log(JSON.stringify(stateAgg));
+      //
+      //create objects with state id and data as key-value pairs
+      dictStates = {};
+      stateAgg.forEach(function(d) {
+        dictStates[d.key] = d;
+      });
+      // console.log(dictStates);
+      stateMap.call(updateStateFill(currStateSel));
+    } else {
+      if (pollClick) {
+        pollDataFil = countyData.filter(function (d){return d.pollutant==selPoll});
+      } else {
+        pollDataFil = countyData;
+      }
+      countyAgg = d3.nest()
+                    .key(function(d) { return d.fips; })
+                    .rollup(function(v) { return {
+                      county: d3.max(v, function(d){ return d.county; }),
+                      val: d3.mean(v, function(d) { return d.val; })
+                    }; })
+                    .entries(pollDataFil);
+      // console.log(JSON.stringify(countyAgg));
+      //
+      //create objects with state id and data as key-value pairs
+      dictCounties = {};
+      countyAgg.forEach(function(d) {
+          dictCounties[d.key] = d;
     });
     // console.log(dictCounties);
     countyMap.call(updateCountyFill(currCountySel));
   }
+}
+
+function setCountyLoadStatus() {
+  countyLoad = true;
 }
