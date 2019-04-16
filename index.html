@@ -6,7 +6,7 @@
   <link href="https://fonts.googleapis.com/css?family=Slabo+27px" rel="stylesheet">
   <title>W209 Final Project</title>
 </head>
-<body>
+<body onLoad="document.getElementById('risk_options').options[0].selected = 'totrisk'">
   <header>
     <nav id="container">
       <ul class="topBar">
@@ -28,7 +28,7 @@
     <section id="introduction">
       <h1 class="introTitle">Introduction</h1>
       <p class="introDetails">
-        In 2010, 1 in 35 deaths in the U.S. were attributed to illness caused by air pollution. According to the study from which the statistic originated the total number of air pollution related deaths in 2010 was half of those in 1990. Since 1990, air pollution has been identified by government agencies like the CDC and EPA as a real health issue to be understood and addressed. According to the National Emissions Inventory Report (NEI), the Environmental Protection Agency compiles air emissions across the United States every three years. The data collected has, in the last decade, been made available to civilians in publicly hosted access tables and a summary report (NEI), however the mode of dessimination lacks ease of use for the average individual. 
+        In 2010, 1 in 35 deaths in the U.S. were attributed to illness caused by air pollution. According to the study from which the statistic originated the total number of air pollution related deaths in 2010 was half of those in 1990. Since 1990, air pollution has been identified by government agencies like the CDC and EPA as a real health issue to be understood and addressed. According to the National Emissions Inventory Report (NEI), the Environmental Protection Agency compiles air emissions across the United States every three years. The data collected has, in the last decade, been made available to civilians in publicly hosted access tables and a summary report (NEI), however the mode of dessimination lacks ease of use for the average individual.
       </p>
     </section>
     <section id="concept">
@@ -77,19 +77,91 @@
 
     <section id="visualization">
       <h1 class="visualTitle">Health Risk and Pollutant Analysis</h1>
-      <script type="text/javascript" src="./scripts/risks.js"></script>
-      <!-- dropdown -->
-      <label for="risk_options" class="dropdownlabel">Risk:</label>
-      <select id="risk_options" class="dropdown"></select>
+      <div>
+        <!-- dropdown -->
+        <label for="risk_options" class="dropdownlabel">Select Risk: </label>
+        <select name="riskoptions" id="risk_options" class="dropdown">
+          <optgroup label="Cancer Risks">
+              <option value="totrisk" selected>Total Cancer Risk</option>
+              <option value="risk1">StationaryPoint Cancer Risk</option>
+              <option value="risk2">LightDuty-OffNetwork-Gas Cancer Risk</option>
+              <option value="risk3">LightDuty-OffNetwork-Diesel Cancer Risk</option>
+              <option value="risk4">HeavyDuty-OffNetwork-Gas Cancer Risk</option>
+              <option value="risk5">HeavyDuty-OffNetwork-Diesel Cancer Risk</option>
+              <option value="risk6">LightDuty-OnNetwork-Gas Cancer Risk</option>
+              <option value="risk7">LightDuty-OnNetwork-Diesel Cancer Risk</option>
+              <option value="risk8">HeavyDuty-OnNetwork-Gas Cancer Risk</option>
+              <option value="risk9">HeavyDuty-OnNetwork-Diesel Cancer Risk</option>
+              <option value="risk10">Refueling Cancer Risk</option>
+              <option value="risk11">HeavyDuty-Hoteling Cancer Risk</option>
+              <option value="risk12">Recreational-inc-PleasureCraft Cancer Risk</option>
+              <option value="risk13">Construction Cancer Risk</option>
+              <option value="risk14">CommercialLawnGarden Cancer Risk</option>
+              <option value="risk15">ResidentialLawnGarden Cancer Risk</option>
+              <option value="risk16">Agriculture Cancer Risk</option>
+              <option value="risk17">CommercialEquipment Cancer Risk</option>
+              <option value="risk18">AllOther Cancer Risk</option>
+              <option value="risk19">CMV_C1C2 Cancer Risk</option>
+              <option value="risk20">CMV_C3 Cancer Risk</option>
+              <option value="risk21">CMV_C1C2C3_underway Cancer Risk</option>
+              <option value="risk22">Locomotives Cancer Risk</option>
+              <option value="risk23">Point-Airports Cancer Risk</option>
+              <option value="risk24">Point-Railyards Cancer Risk</option>
+              <option value="risk25">Industrial Cancer Risk</option>
+              <option value="risk26">CommercialCooking Cancer Risk</option>
+              <option value="risk27">OilGas Cancer Risk</option>
+              <option value="risk28">SolventsCoatings Cancer Risk</option>
+              <option value="risk29">StorageTransfer_BulkTerminals_GasStage1 Cancer Risk</option>
+              <option value="risk30">MiscellaneousNonindustrial Cancer Risk</option>
+              <option value="risk31">FuelCombustion_not_RWC Cancer Risk</option>
+              <option value="risk32">ResidentialWoodCombustionRWC Cancer Risk</option>
+              <option value="risk33">WasteDisposal Cancer Risk</option>
+              <option value="risk34">AgricultureLivestock Cancer Risk</option>
+              <option value="risk35">FIRE Cancer Risk</option>
+              <option value="risk36">BIOGENICS Cancer Risk</option>
+              <option value="risk37">SECONDARY Cancer Risk</option>
+              <option value="risk38">BACKGROUND Cancer Risk</option>
+          </optgroup>
+          <optgroup label="Non Cancer Risks">
+              <option value="hi_resp">Total Respiratory Risk</option>
+              <option value="hi_neur">Total Neurological Risk</option>
+              <option value="hi_live">Total Liver Risk</option>
+              <option value="hi_deve">Total Developmental Risk</option>
+              <option value="hi_repr">Total Reproductive Risk</option>
+              <option value="hi_kidn">Total Kidney Risk</option>
+              <option value="hi_ocul">Total Ocular Risk</option>
+              <option value="hi_endo">Total Endocrine Risk</option>
+              <option value="hi_hema">Total Hematological Risk</option>
+              <option value="hi_immu">Total Immunological Risk</option>
+              <option value="hi_skel">Total Skeletal Risk</option>
+              <option value="hi_sple">Total Spleen Risk</option>
+              <option value="hi_thyr">Total Thyroid Risk</option>
+              <option value="hi_whol">Total Wholebody Risk</option>
+          </optgroup>
+        </select>
+
+         <button type="button" class="state_reset" onclick="resetState()">Reset to State View</button>
+         <button type="button" class="county_reset" onclick="resetCounty()">Reset County Selection</button>
+         <button type="button" class="poll_reset" onclick="resetPollClick()">Reset Pollutant Selection</button>
+      </div>
       <div id="mapContainer">
-        <div class="map"></div>
-        <div class="bar_chart"></div>
+            <div class="map">
+                <!-- <div>
+                  <h4>Map</h4>
+                </div> -->
+              </div>
+            <div class="bar_chart">
+                <!-- <div>
+                  <h4>Bar</h4>
+                </div> -->
+              </div>
       </div>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.5.0/d3.min.js"></script>
       <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
       <script src="https://d3js.org/d3.v4.0.0-alpha.49.min.js"></script>
       <script src="https://d3js.org/d3-selection-multi.v0.3.min.js"></script>
       <script type="text/javascript" src="https://d3js.org/topojson.v3.min.js"></script>
+      <script src="https://d3js.org/d3-timer.v1.min.js"></script>
       <script type="text/javascript" src="./scripts/scriptD3.js"></script>
     </section>
 

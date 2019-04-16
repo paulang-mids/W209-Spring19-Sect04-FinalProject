@@ -1,7 +1,7 @@
 body {
   margin: 0px;
   padding: 0px;
-  background-color: #f2f2f2;
+  background-color: #d9d9d9;
   font-family: 'Slabo 27px', serif;
 }
 a {
@@ -11,6 +11,12 @@ a {
 a:active {
   text-decoration: underline;
 }
+
+/* h3 {
+  font-size: 24px;
+  color: red;
+} */
+
 .coverImage {
   background-image: url('../images/cover.jpg');
   background-attachment: fixed;
@@ -97,10 +103,10 @@ a:active {
   width: 350px;
   height: auto;
   color: #b3003b;
-  background-color: #f2f2f2;
+  background-color: #d9d9d9;
   border: 1px solid #e6e6e6;
   border-radius: 8px;
-  box-shadow: 2px 3px #f2f2f2;
+  box-shadow: 2px 3px #d9d9d9;
 }
 .conceptDivs h3 {
   text-align: center;
@@ -117,7 +123,7 @@ a:active {
   color:  #595959;
 }
 #visualization {
-  height: 100vh;
+  height: auto;
 }
 .visualTitle {
   color: #2e3d49;
@@ -134,11 +140,11 @@ a:active {
 
 .map {
   margin-left: -80px;
-  margin-top: -15px;
+  margin-top: -10px;
 }
 
 .bar_chart {
-  margin-top: 40px;
+  margin-top: 20px;
   margin-left: -95px;
 }
 
@@ -150,6 +156,36 @@ a:active {
 
 .dropdown {
   margin-bottom: 10px;
+}
+
+.state_reset {
+  display: none;
+  background-color: #0073e6;
+  color: white;
+  border-radius: 10px;
+  border: none;
+  padding: 3px 8px;
+  margin-left: 5px;
+}
+
+.county_reset {
+  display: none;
+  background-color: #0073e6;
+  color: white;
+  border-radius: 10px;
+  border: none;
+  padding: 3px 8px;
+  margin-left: 5px;
+}
+
+.poll_reset {
+  display: none;
+  background-color: #0073e6;
+  color: white;
+  border-radius: 10px;
+  border: none;
+  padding: 3px 8px;
+  margin-left: 5px;
 }
 
 #about {
@@ -221,16 +257,31 @@ a:active {
 
 #states :hover{
     fill: #0cccf7;
+    /* stroke: #057a94;
+    stroke-width: 2; */
 }
 
-#counties :hover{
+/* #counties :hover{
     fill: #0cccf7;
+    stroke: #057a94;
+    stroke-width: 0.5;
+} */
+
+.focus.mainBars :hover{
+    fill: #ff6699;
+    stroke: #ff6699;
+    /* stroke-width: 0.5; */
 }
 
 .county-boundary {
     fill: #aaa;
     stroke: #fff;
     stroke-width: .5px;
+}
+
+.chartTitle {
+  font-weight: bold;
+  font-style: italic;
 }
 
 .tooltip {
