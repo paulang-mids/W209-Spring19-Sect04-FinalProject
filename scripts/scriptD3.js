@@ -711,6 +711,7 @@ function updateRisk() {
     d3.csv(riskFile, function(error, data) {
       if (error) throw error;
       // console.log(data);
+      stateData = data;
       stateAgg = d3.nest()
                     .key(function(d) { return d.id ; })
                     .rollup(function(v) { return {
@@ -750,6 +751,7 @@ function updateRisk() {
     d3.csv(riskFile, function(error, data) {
       if (error) throw error;
       // console.log(data);
+      countyData = data;
       countyAgg = d3.nest()
                     .key(function(d) { return d.fips; })
                     .rollup(function(v) { return {
