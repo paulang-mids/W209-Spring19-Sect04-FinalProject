@@ -37,7 +37,17 @@ mapSVG = d3.select('.map').append('svg')
   .attr('height', mapHeight + mapMargin.top + mapMargin.bottom)
   .attr('width', mapWidth + mapMargin.left + mapMargin.right);
 
-mapColor = d3.scaleSequential(d3.interpolateBlues);
+// mapColor = d3.scaleSequential(d3.interpolateBlues);
+mapColorGreen = d3.scaleSequential(d3.interpolate("#ecf9ec", "#267326"))
+    .domain([0,0.5]);
+mapColorYellow = d3.scaleSequential(d3.interpolate("#ffffcc", "#ffff00"))
+    .domain([0.5,1]);
+mapColorRed1 = d3.scaleSequential(d3.interpolate("#ffcccc", "#ff1a1a"))
+    .domain([1,50]);
+mapColorRed2 = d3.scaleSequential(d3.interpolate("#ff0000", "#cc0000"))
+    .domain([50,100]);
+mapColorRed3 = d3.scaleSequential(d3.interpolate("#b30000", "#800000"))
+    .domain([100,195]);
 
 //Chloropleth Title
 mapTitle = mapSVG.append('text')
@@ -178,8 +188,8 @@ function showStates() {
 function updateStateFill(selection) {
   // console.log("Selection: ",selection.data());
   currStateSel = selection;
-  mapColor.domain([d3.min(stateAgg, function(d) { return d.value.val; }),
-                d3.max(stateAgg, function(d) { return d.value.val; })]);
+  // mapColor.domain([d3.min(stateAgg, function(d) { return d.value.val; }),
+  //               d3.max(stateAgg, function(d) { return d.value.val; })]);
   selection.transition()
            .duration(100)
            .attr("fill", function(d) {
@@ -187,7 +197,17 @@ function updateStateFill(selection) {
                 var value = dictStates[d.id].value.val;
 
                 if (value) {
-                  return mapColor(value);
+                  if (value < 0.5){
+                    return mapColorGreen(value);
+                  } else if (value <= 1) {
+                    return mapColorYellow(value);
+                  } else if (value <= 50) {
+                    return mapColorRed1(value);
+                  } else if (value <= 100) {
+                    return mapColorRed2(value);
+                  } else {
+                    return mapColorRed3(value);
+                  }
                 } else {
                   return "grey";
                 }
@@ -249,7 +269,7 @@ function showCounty(fips) {
                   selCountyPath = this;
                   selCountyColor = d3.select(this).style("fill");
                   d3.selectAll("button.county_reset").style("display", "inline-block");
-                  d3.select(this).style("fill", "#0cccf7")
+                  d3.select(this).style("fill", "#b3f0ff")
                                   // .style("stroke", "#057a94")
                                   // .style("stroke-width", 0.5)
                                   ;
@@ -268,7 +288,7 @@ function showCounty(fips) {
               .on("mouseover", function(d) {
                 if (countyLoad) {
                   selCountyColor = d3.select(this).style("fill");
-                  d3.select(this).style("fill", "#0cccf7");
+                  d3.select(this).style("fill", "#b3f0ff");
                 }
                 countyFips = d.properties.fips;
                 countyDataFil = data.filter(function (d){return d.fips==countyFips});
@@ -308,8 +328,8 @@ function showCounty(fips) {
 //Function to update the colors for the different states in the chloropleth
 function updateCountyFill(selection) {
   currCountySel = selection;
-  mapColor.domain([d3.min(countyAgg, function(d) { return d.value.val; }),
-                d3.max(countyAgg, function(d) { return d.value.val; })]);
+  // mapColor.domain([d3.min(countyAgg, function(d) { return d.value.val; }),
+  //               d3.max(countyAgg, function(d) { return d.value.val; })]);
   selection.transition()
            .duration(100)
            .attr("fill", function(d) {
@@ -317,7 +337,17 @@ function updateCountyFill(selection) {
              countyObj = dictCounties[d.properties.fips];
              if (countyObj) {
                 var value = countyObj.value.val;
-                return mapColor(value);
+                if (value < 0.5){
+                  return mapColorGreen(value);
+                } else if (value <= 1) {
+                  return mapColorYellow(value);
+                } else if (value <= 50) {
+                  return mapColorRed1(value);
+                } else if (value <= 100) {
+                  return mapColorRed2(value);
+                } else {
+                  return mapColorRed3(value);
+                }
               }
               else {
                 return "grey";
@@ -494,14 +524,14 @@ function createBar(pollData, data){
                 return xScale(d.value.val);
               })
               .attr('opacity', 0.85)
-              .style('fill', '#b3003b')
-              .style('stroke', '#80002a')
+              .style('fill', '#0086b3')
+              .style('stroke', '#0086b3')
               // .attr("text", "test")
               .on("click", function(d) {
                 if (!countyClick) {
                   if (pollClick) {
-                    d3.select(selPollBar).style("fill", '#b3003b')
-                                        .style('stroke', '#80002a');
+                    d3.select(selPollBar).style("fill", '#0086b3')
+                                        .style('stroke', '#0086b3');
                   }
                   pollClick = true;
                   selPollBar = this;
@@ -512,14 +542,14 @@ function createBar(pollData, data){
                     mapTitle.text(selRiskString + " Assessment for " + selPoll);
                   }
                   d3.selectAll("button.poll_reset").style("display", "inline-block");
-                  d3.select(this).style('fill', '#ff6699')
-                                  .style('stroke', '#ff6699');
+                  d3.select(this).style('fill', '#4dd2ff')
+                                  .style('stroke', '#4dd2ff');
                   updatePoll(selPoll, data);
                 }
               })
               .on("mouseover", function(d){
-                d3.select(this).style('fill', '#ff6699')
-                                .style('stroke', '#ff6699');
+                d3.select(this).style('fill', '#4dd2ff')
+                                .style('stroke', '#4dd2ff');
                 pollHover(d);
                 //Update chloropleth only if there is no county selection
                 if (!countyClick) {
@@ -527,12 +557,12 @@ function createBar(pollData, data){
                 }
               })
               .on("mouseout", function(d){
-                d3.select(this).style('fill', '#b3003b')
-                                .style('stroke', '#80002a');
+                d3.select(this).style('fill', '#0086b3')
+                                .style('stroke', '#0086b3');
                 hideTip();
                 if (pollClick) {
-                  d3.select(selPollBar).style('fill', '#ff6699')
-                                        .style('stroke', '#ff6699');
+                  d3.select(selPollBar).style('fill', '#4dd2ff')
+                                        .style('stroke', '#4dd2ff');
                   updatePoll(selPoll, data);
                 }
                 if (!countyClick) {
@@ -559,8 +589,8 @@ function createBar(pollData, data){
                 })
                 .attr('opacity', 0.85)
                 .attr('height', 5)
-                .style('fill', '#4d0019')
-                .style('stroke', '#330011');
+                .style('fill', '#004d66')
+                .style('stroke', '#004d66');
 
     if (pollData.length > 8) { brushExtent = 8;}
     else {brushExtent = pollData.length - 1;}
@@ -634,7 +664,7 @@ function createBar(pollData, data){
     if (pollClick) {
       d3.selectAll(".mainBars").filter(function(d) {
         return d.key == selPoll;
-      }).style("fill", '#ff6699').style('stroke', '#ff6699');
+      }).style("fill", '#4dd2ff').style('stroke', '#4dd2ff');
     }
 }
 
@@ -823,7 +853,7 @@ function resetPollClick() {
   d3.selectAll("button.poll_reset").style("display", "none");
   d3.selectAll(".mainBars").filter(function(d) {
     return d.key == selPoll;
-  }).style("fill", '#b3003b').style('stroke', '#80002a');
+  }).style("fill", '#0086b3').style('stroke', '#0086b3');
   if (selState.length > 0) {
     mapTitle.text(selRiskString + ' Assessment for ' + selState);
   } else {

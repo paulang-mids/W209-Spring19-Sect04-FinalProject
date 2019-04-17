@@ -256,7 +256,7 @@ a:active {
 }
 
 #states :hover{
-    fill: #0cccf7;
+    fill: #b3f0ff;
     /* stroke: #057a94;
     stroke-width: 2; */
 }
@@ -267,11 +267,11 @@ a:active {
     stroke-width: 0.5;
 } */
 
-.focus.mainBars :hover{
-    fill: #ff6699;
-    stroke: #ff6699;
+/* .focus.mainBars :hover{ */
+    /* fill: #4dd2ff;
+    stroke: #ff6699; */
     /* stroke-width: 0.5; */
-}
+/* } */
 
 .county-boundary {
     fill: #aaa;
