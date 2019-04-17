@@ -6,12 +6,10 @@ var mapMargin = {top: 15, bottom: 10, left: 10, right:0}
     , mapHeight = mapWidth * mapRatio
     , active = d3.select(null);
 
-var errorCount = 0;
-
 var mapSVG, mapColor, mapTitle, mapG, countyMap, stateMap;
 var countyData, stateData, countyAgg, stateAgg, dictCounties, dictState;
 
-// Bar Variables
+// BarChart Variables
 var barMargin = {top: 20, right: 10, bottom: 60, left: 200}
     , barMargin2 = {top: 10, right: 10, bottom: 30, left: 10}
     , barWidth = 550 - barMargin.left - barMargin.right
@@ -23,7 +21,7 @@ var barSVG, barTitle, focus,context,
     xAxis,yAxis,yAxis2,
     brushExtent, pollData;
 
-//Click and Hover control variables
+//Click and Hover control variables for chloropleth and barchart
 var currStateSel, currCountySel, selStateID, selState="", selCounty, selCountyPath, selCountyColor, selStateFeature, stateView, selPollBar, selPoll;
 var countyClickSelFil;
 var countyClick = false,
@@ -44,6 +42,7 @@ mapColor = d3.scaleSequential(d3.interpolateBlues);
 //Chloropleth Title
 mapTitle = mapSVG.append('text')
                   .attr("class", "chartTitle")
+                  .attr("fill", "#2e3d49")
                   .attr('transform', 'translate('+(mapMargin.left+mapWidth * 0.2)+','+(mapMargin.top + (mapWidth * .04))+')')
                   .text(selRiskString + " Assessment")
 
@@ -70,19 +69,18 @@ var tooltip = d3.select("body").append("div")
               	.attr("class", "tooltip")
               	.style("opacity", 0);
 
-//Dropdown selection
+//Dropdown
 var riskDropdown = d3.select("#risk_options");
-// populate drop-down
-riskDropdown.on("change", updateRisk);
-            // .selectAll("option")
-            // .data(risks)
-            // .enter()
-            // .append("option")
-            // .attr("value", function(option) { return option.value; })
-            // .text(function(option) { return option.text; });
 
+//Capture dropdown change
+riskDropdown.on("change", updateRisk);
+
+// Draw initial chloropleth (state level view)
 showStates();
 
+//Main function for drawing state level chloropleth.
+//Also defines the on click, mouseover and mouseout events for the state level chloropleth.
+//Invokes function to draw the pollutant bar chart as well.
 function showStates() {
   stateView = true;
   var stateFile = "../data/StateData/" + selRisk + ".csv";
@@ -176,6 +174,7 @@ function showStates() {
   });
 }
 
+//Function to update the colors for the different states in the chloropleth
 function updateStateFill(selection) {
   // console.log("Selection: ",selection.data());
   currStateSel = selection;
@@ -198,6 +197,8 @@ function updateStateFill(selection) {
            });
 }
 
+//Main function for drawing county level chloropleth.
+//Also defines the on click, mouseover and mouseout events for the county level chloropleth.
 function showCounty(fips) {
   stateView = false;
 	var countyFile = "../data/CountyData/" + selRisk + "/" + selRisk + selState + ".csv";
@@ -304,6 +305,7 @@ function showCounty(fips) {
   });
 }
 
+//Function to update the colors for the different states in the chloropleth
 function updateCountyFill(selection) {
   currCountySel = selection;
   mapColor.domain([d3.min(countyAgg, function(d) { return d.value.val; }),
@@ -323,6 +325,7 @@ function updateCountyFill(selection) {
            });
 }
 
+//Function to control the zoom of the county level view
 function countyZoom() {
   var bounds = path.bounds(selStateFeature),
       dx = bounds[1][0] - bounds[0][0],
@@ -345,6 +348,7 @@ function countyZoom() {
       .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
 }
 
+//Function to reset chloropleth to state view. Called from the 'Reset State' button.
 function resetState(){
     d3.selectAll("button.state_reset").style("display", "none");
     d3.selectAll("button.county_reset").style("display", "none");
@@ -366,6 +370,7 @@ function resetState(){
       .attr('transform', 'translate('+mapMargin.left+','+mapMargin.top+')');
 }
 
+//Function to reset county selections in the chloropleth. Called from the 'Reset County' button.
 function resetCounty() {
   countyClick = false;
   d3.selectAll("button.county_reset").style("display", "none");
@@ -379,6 +384,7 @@ function resetCounty() {
   countyZoom();
 }
 
+//Function to get pollutant and their levels as key value
 function getPollData(data) {
   pollData = d3.nest()
                 .key(function(d) { return d.pollutant; })
@@ -389,6 +395,8 @@ function getPollData(data) {
   // console.log(JSON.stringify(pollData), pollData.length);
 }
 
+//Main function for drawing the main bar chart as well as the brush chart.
+//Also defines the on click, mouseover and mouseout events for the main bar chart.
 function createBar(pollData, data){
 
     barSVG = d3.select(".bar_chart").append("svg")
@@ -397,6 +405,7 @@ function createBar(pollData, data){
 
     //Chloropleth Title
     barTitle = barSVG.append('text')
+                      .attr("fill", "#2e3d49")
                       .attr("class", "chartTitle")
                       .attr('transform', 'translate('+(barMargin.left - 60) + "," + (barMargin.top) +')');
 
@@ -629,6 +638,7 @@ function createBar(pollData, data){
     }
 }
 
+//Function to return tooltip for state level view
 function stateHover(d) {
   var value = dictStates[d.id].value.val;
   if (value) {
@@ -646,6 +656,7 @@ function stateHover(d) {
       // console.log(d.id, value, dictStates[d.id].value.state);
 }
 
+//Function to return tooltip for state level view
 function countyHover(d) {
   var countyObj = dictCounties[d.properties.fips];
   if (countyObj) {
@@ -662,12 +673,14 @@ function countyHover(d) {
   }
 }
 
+//Function to hide tooltips
 function hideTip() {
   tooltip.transition()
           .duration(250)
           .style("opacity", 0);
 }
 
+//Function to return tooltip for main bar chart
 function pollHover(d) {
   // console.log("pollhover: ", d);
     tooltip.transition()
@@ -682,6 +695,7 @@ function pollHover(d) {
             .style("top", (d3.event.pageY - 28) + "px");
 }
 
+//Function to update vizualizations based on drop down selection
 function updateRisk() {
   // console.log("In Update");
   selRisk = this.value;
@@ -759,6 +773,7 @@ function updateRisk() {
   }
 }
 
+//Function to update chloropleth based on pollutant selection
 function updatePoll(pollName, data) {
   // console.log("In Poll Update: ", pollName);
 	// console.log(data);
@@ -802,6 +817,7 @@ function updatePoll(pollName, data) {
   }
 }
 
+//Function to reset pollutant selections. Called from the 'Reset Pollutant' button.
 function resetPollClick() {
   pollClick = false;
   d3.selectAll("button.poll_reset").style("display", "none");
@@ -816,6 +832,7 @@ function resetPollClick() {
   resetPoll();
 }
 
+//Function to reset chloropleth when pollutant selection is cleared
 function resetPoll() {
     console.log("In Poll Reset: ");
     if (stateView) {
@@ -865,6 +882,7 @@ function resetPoll() {
   }
 }
 
+//Function to control delay for drawing the county level viz on click event for state view
 function setCountyLoadStatus() {
   countyLoad = true;
 }
