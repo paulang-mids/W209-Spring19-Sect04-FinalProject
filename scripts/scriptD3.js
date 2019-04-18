@@ -327,7 +327,7 @@ function showCounty(fips) {
   });
 }
 
-//Function to update the colors for the different states in the chloropleth
+//Function to update the colors for the different counties in the chloropleth
 function updateCountyFill(selection) {
   currCountySel = selection;
   // mapColor.domain([d3.min(countyAgg, function(d) { return d.value.val; }),
@@ -672,14 +672,23 @@ function createBar(pollData, data){
 
 //Function to return tooltip for state level view
 function stateHover(d) {
-  var value = dictStates[d.id].value.val;
+  if (dictStates[d.id]) {
+    displayState = dictStates[d.id].value.state;
+    displayValue = dictStates[d.id].value.val;
+  } else {
+    stateName = stateData.filter(function (s){
+      return s.id==d.id
+    });
+    displayState = stateName[0].state;
+    displayValue = "Data Not Available";
+  }
    tooltip.transition()
            .duration(250)
            .style("opacity", 1);
            tooltip.html(
-           "<p><strong>" + dictStates[d.id].value.state + "</strong></p>" +
+           "<p><strong>" + displayState + "</strong></p>" +
            "<table><tbody>" +
-           "<tr><td>Risk:</td><td>" + value + "</td></tr></tbody></table>"
+           "<tr><td>Risk:</td><td>" + displayValue + "</td></tr></tbody></table>"
            )
            .style("left", (d3.event.pageX + 15) + "px")
            .style("top", (d3.event.pageY - 28) + "px");
@@ -689,19 +698,26 @@ function stateHover(d) {
 
 //Function to return tooltip for state level view
 function countyHover(d) {
-  var countyObj = dictCounties[d.properties.fips];
-  if (countyObj) {
+  if (dictCounties[d.properties.fips]) {
+    displayCounty = dictCounties[d.properties.fips].value.county;
+    displayValue = dictCounties[d.properties.fips].value.val;
+  } else {
+    countyName = countyData.filter(function (c){
+      return c.fips==d.properties.fips
+    });
+    displayCounty = countyName[0].county;
+    displayValue = "Data Not Available";
+  }
    tooltip.transition()
            .duration(250)
            .style("opacity", 1);
            tooltip.html(
-           "<p><strong>" + countyObj.value.county + ", " + selState + "</strong></p>" +
+           "<p><strong>" + displayCounty + ", " + selState + "</strong></p>" +
            "<table><tbody>" +
-           "<tr><td>Risk:</td><td>" + countyObj.value.val + "</td></tr></tbody></table>"
+           "<tr><td>Risk:</td><td>" + displayValue + "</td></tr></tbody></table>"
            )
            .style("left", (d3.event.pageX + 15) + "px")
            .style("top", (d3.event.pageY - 28) + "px");
-  }
 }
 
 //Function to hide tooltips
