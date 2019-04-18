@@ -139,6 +139,8 @@ function showStates() {
                 .attr("d", path)
                 .attr("class", "state")
                 .attr("fill", "#b3b3b3")
+                .attr("stroke", "#d9d9d9")
+                .attr("stroke-width", 0.5)
                 .call(updateStateFill)
                 .on("click", function(d){
                   selStateID = d.id;
@@ -256,8 +258,8 @@ function showCounty(fips) {
               .attr("d", path)
               .attr("class", "county")
               .attr("fill", "#b3b3b3")
-              // .attr("stroke", "none")
-              // .attr("stroke-width", 0)
+              .attr("stroke", "#d9d9d9")
+              .attr("stroke-width", 0.05)
               .call(updateCountyFill)
               .on("click", function(d){
                 if (!pollClick) {
@@ -671,18 +673,17 @@ function createBar(pollData, data){
 //Function to return tooltip for state level view
 function stateHover(d) {
   var value = dictStates[d.id].value.val;
-  if (value) {
-     tooltip.transition()
-             .duration(250)
-             .style("opacity", 1);
-             tooltip.html(
-             "<p><strong>" + dictStates[d.id].value.state + "</strong></p>" +
-             "<table><tbody>" +
-             "<tr><td>Risk:</td><td>" + value + "</td></tr></tbody></table>"
-             )
-             .style("left", (d3.event.pageX + 15) + "px")
-             .style("top", (d3.event.pageY - 28) + "px");
-  }
+   tooltip.transition()
+           .duration(250)
+           .style("opacity", 1);
+           tooltip.html(
+           "<p><strong>" + dictStates[d.id].value.state + "</strong></p>" +
+           "<table><tbody>" +
+           "<tr><td>Risk:</td><td>" + value + "</td></tr></tbody></table>"
+           )
+           .style("left", (d3.event.pageX + 15) + "px")
+           .style("top", (d3.event.pageY - 28) + "px");
+
       // console.log(d.id, value, dictStates[d.id].value.state);
 }
 
