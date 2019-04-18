@@ -40,7 +40,7 @@ mapSVG = d3.select('.map').append('svg')
 // mapColor = d3.scaleSequential(d3.interpolateBlues);
 mapColorGreen = d3.scaleSequential(d3.interpolate("#ecf9ec", "#267326"))
     .domain([0,0.5]);
-mapColorYellow = d3.scaleSequential(d3.interpolate("#ffffcc", "#ffff00"))
+mapColorYellow = d3.scaleSequential(d3.interpolate("#fff5cc", "#ffcc00"))
     .domain([0.5,1]);
 mapColorRed1 = d3.scaleSequential(d3.interpolate("#ffcccc", "#ff1a1a"))
     .domain([1,50]);
