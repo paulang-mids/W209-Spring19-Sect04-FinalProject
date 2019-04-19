@@ -502,7 +502,7 @@ function createBar(pollData, data){
     // Add the Y Axis
     focus.append("g")
           .attr("class", "y axis")
-          .attr("transform", "translate(-5, 0)")
+          .attr("transform", "translate(-1, 0)")
           .call(yAxis);
 
     barSVG.append("defs").append("clipPath")
@@ -628,7 +628,7 @@ function createBar(pollData, data){
             })
             .attr("y", function(d) {
               // console.log(y.bandwidth(), nD.length);
-              return yScale(d.key)+ yScale.bandwidth()/4;
+              return yScale(d.key); //+ yScale.bandwidth()/4;
             })
             .attr("x", 0)
             .attr('width', function(d, i) {
