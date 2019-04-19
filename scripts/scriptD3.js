@@ -4,14 +4,16 @@ var mapMargin = {top: 15, bottom: 10, left: 10, right:0}
     , mapWidth = mapWidth - mapMargin.left - mapMargin.right
     , mapRatio = 0.6
     , mapHeight = mapWidth * mapRatio
-    , active = d3.select(null);
+    , active = d3.select(null)
+    , legendWidth = 600
+    , legendHeight = 135;
 
-var mapSVG, mapColor, mapTitle, mapG, countyMap, stateMap;
+var mapSVG, mapColor, mapTitle, mapG, countyMap, stateMap, legendSVG, legend;
 var countyData, stateData, countyAgg, stateAgg, dictCounties, dictState;
 
 // BarChart Variables
 var barMargin = {top: 20, right: 10, bottom: 60, left: 200}
-    , barMargin2 = {top: 10, right: 10, bottom: 30, left: 10}
+    , barMargin2 = {top: 20, right: 10, bottom: 30, left: 10}
     , barWidth = 550 - barMargin.left - barMargin.right
     , barHeight = 450 - barMargin.top - barMargin.bottom
     , barWidth2 = 100 - barMargin2.left - barMargin2.right;
@@ -31,12 +33,13 @@ var countyClick = false,
 //Common Variables
 var selRisk = "totrisk", selRiskString = "Total Cancer Risk";
 
-// Chloropleth Elements
+// Chloropleth SVG
 mapSVG = d3.select('.map').append('svg')
   .attr('class', 'center-container')
   .attr('height', mapHeight + mapMargin.top + mapMargin.bottom)
   .attr('width', mapWidth + mapMargin.left + mapMargin.right);
 
+// Chloropleth colors
 // mapColor = d3.scaleSequential(d3.interpolateBlues);
 mapColorGreen = d3.scaleSequential(d3.interpolate("#ecf9ec", "#267326"))
     .domain([0,0.5]);
@@ -56,6 +59,7 @@ mapTitle = mapSVG.append('text')
                   .attr('transform', 'translate('+(mapMargin.left+mapWidth * 0.2)+','+(mapMargin.top + (mapWidth * .04))+')')
                   .text(selRiskString + " Assessment")
 
+// Other chloropleth elements
 mapSVG.append('rect')
       .attr('class', 'background center-container')
       .attr('height', mapHeight + mapMargin.top + mapMargin.bottom)
@@ -87,6 +91,8 @@ riskDropdown.on("change", updateRisk);
 
 // Draw initial chloropleth (state level view)
 showStates();
+// Draw legend
+showLegend();
 
 //Main function for drawing state level chloropleth.
 //Also defines the on click, mouseover and mouseout events for the state level chloropleth.
@@ -271,10 +277,7 @@ function showCounty(fips) {
                   selCountyPath = this;
                   selCountyColor = d3.select(this).style("fill");
                   d3.selectAll("button.county_reset").style("display", "inline-block");
-                  d3.select(this).style("fill", "#b3f0ff")
-                                  // .style("stroke", "#057a94")
-                                  // .style("stroke-width", 0.5)
-                                  ;
+                  d3.select(this).style("fill", "#b3f0ff");
                   countyFips = d.properties.fips;
                   selCounty = dictCounties[d.properties.fips].value.county;
                   mapTitle.text(selRiskString + " Assessment for " + selCounty + ", " + selState);
@@ -929,6 +932,202 @@ function resetPoll() {
     // console.log(dictCounties);
     countyMap.call(updateCountyFill(currCountySel));
   }
+}
+
+function showLegend() {
+  // Legend
+  legendSVG = d3.select(".legend").append("svg")
+    .attr("width", legendWidth)
+    .attr("height", legendHeight);
+
+  // Low Risk Legend Colors
+  legend = legendSVG.append("g")
+  .attr("class", "legendG")
+  .attr("transform", "translate(370,15)")
+  ;
+
+  var legendGreens = d3.legendColor()
+  .shapeWidth(20)
+  .cells([0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5])
+  .labels(["", "", "", "", "", "", "", "", "", "", ""])
+  .labelWrap(30)
+  .labelAlign("start")
+  .orient('horizontal')
+  .shapePadding(0)
+  .scale(mapColorGreen);
+
+  legendSVG.select(".legendG")
+  .call(legendGreens);
+
+  // Medium Risk Legend Colors
+  legend = legendSVG.append("g")
+  .attr("class", "legendY")
+  .attr("transform", "translate(370,50)")
+  ;
+
+  var legendYellows = d3.legendColor()
+  .shapeWidth(20)
+  .cells([0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1])
+  .labels(["", "", "", "", "", "", "", "", "", "", ""])
+  .labelWrap(30)
+  .labelAlign("start")
+  .orient('horizontal')
+  .shapePadding(0)
+  .scale(mapColorYellow);
+
+  legendSVG.select(".legendY")
+  .call(legendYellows);
+
+  // High Risk Legend Colors
+  // Red Group1
+  legend = legendSVG.append("g")
+  .attr("class", "legendR1")
+  .attr("transform", "translate(370,85)")
+  ;
+
+  var legendReds1 = d3.legendColor()
+  .shapeWidth(20)
+  .cells([1, 10, 20, 30, 40])
+  .labels(["", "", "", "", "", ""])
+  .labelWrap(30)
+  .labelAlign("start")
+  .orient('horizontal')
+  .shapePadding(0)
+  .scale(mapColorRed1);
+
+  legendSVG.select(".legendR1")
+  .call(legendReds1);
+
+  // Red Group2
+  legend = legendSVG.append("g")
+  .attr("class", "legendR2")
+  .attr("transform", "translate(470,85)")
+  ;
+
+  var legendReds2 = d3.legendColor()
+  .shapeWidth(20)
+  .cells([51, 75, 100])
+  .labels(["", "", "", ""])
+  .labelWrap(30)
+  .labelAlign("start")
+  .orient('horizontal')
+  .shapePadding(0)
+  .scale(mapColorRed2);
+
+  legendSVG.select(".legendR2")
+  .call(legendReds2);
+
+  // Red Group3
+  legend = legendSVG.append("g")
+  .attr("class", "legendR3")
+  .attr("transform", "translate(530,85)")
+  ;
+
+  var legendReds3 = d3.legendColor()
+  .shapeWidth(20)
+  .cells([132, 164, 195])
+  .labels(["", "", "", ""])
+  .labelWrap(30)
+  .labelAlign("start")
+  .orient('horizontal')
+  .shapePadding(0)
+  .scale(mapColorRed3);
+
+  legendSVG.select(".legendR3")
+  .call(legendReds3);
+
+  // No Data
+  legendSVG.append("rect")
+            .attr("x",370)
+            .attr("y",120)
+            .attr("width",220)
+            .attr("height",20)
+            .attr("fill", "grey")
+
+  // Legend Texts
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 10)
+    .attr("x", 440)
+    .text("Risk Levels");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 25)
+    .attr("x", 309)
+    .text("Low Risk");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 42)
+    .attr("x", 367)
+    .text("0");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 42)
+    .attr("x", 470)
+    .text("0.25");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 42)
+    .attr("x", 579)
+    .text("0.49");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 60)
+    .attr("x", 290)
+    .text("Medium Risk");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 77)
+    .attr("x", 367)
+    .text("0.5");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 77)
+    .attr("x", 470)
+    .text("0.75");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 77)
+    .attr("x", 585)
+    .text("1");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 95)
+    .attr("x", 307)
+    .text("High Risk");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 112)
+    .attr("x", 363)
+    .text("1.001");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 112)
+    .attr("x", 475)
+    .text("98");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 112)
+    .attr("x", 579)
+    .text("195");
+
+  legendSVG.append("text")
+    .attr("class", "legendText")
+    .attr("y", 130)
+    .attr("x", 260)
+    .text("Data Not Available");
 }
 
 //Function to control delay for drawing the county level viz on click event for state view
