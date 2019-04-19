@@ -677,6 +677,7 @@ function createBar(pollData, data){
 //Function to return tooltip for state level view
 function stateHover(d) {
   if (dictStates[d.id]) {
+    console.log(dictStates[d.id].value);
     displayState = dictStates[d.id].value.state;
     displayValue = dictStates[d.id].value.val;
   } else {
