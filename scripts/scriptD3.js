@@ -687,7 +687,9 @@ function stateHover(d) {
     stateName = stateData.filter(function (s){
       return s.id==d.id
     });
+    console.log(stateName[0])
     displayState = stateName[0].state;
+    displayStateName = stateName[0].state_name;
     displayValue = "Data Not Available";
   }
    tooltip.transition()
@@ -771,7 +773,8 @@ function updateRisk() {
                     .key(function(d) { return d.id ; })
                     .rollup(function(v) { return {
                     state: d3.max(v, function(d){ return d.state; }),
-                    val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                    val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                    stateFull: d3.max(v, function(d){ return d.state_name; })
                     }; })
                     .entries(data);
       // console.log(JSON.stringify(stateAgg));
@@ -841,7 +844,8 @@ function updatePoll(pollName, data) {
                   .key(function(d) { return d.id ; })
                   .rollup(function(v) { return {
                   state: d3.max(v, function(d){ return d.state; }),
-                  val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                  val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                  stateFull: d3.max(v, function(d){ return d.state_name; })
                   }; })
                   .entries(pollDataFil);
     // console.log(JSON.stringify(stateAgg));
@@ -902,7 +906,8 @@ function resetPoll() {
                     .key(function(d) { return d.id ; })
                     .rollup(function(v) { return {
                     state: d3.max(v, function(d){ return d.state; }),
-                    val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                    val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                    stateFull: d3.max(v, function(d){ return d.state_name; })
                     }; })
                     .entries(pollDataFil);
       // console.log(JSON.stringify(stateAgg));
