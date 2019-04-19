@@ -114,7 +114,8 @@ function showStates() {
                         .key(function(d) { return d.id ; })
                         .rollup(function(v) { return {
                           state: d3.max(v, function(d){ return d.state; }),
-                          val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                          val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                          stateFull: d3.max(v, function(d){ return d.state_name; })
                         }; })
                         .entries(pollDataFil);
         } else {
@@ -122,7 +123,8 @@ function showStates() {
                         .key(function(d) { return d.id ; })
                         .rollup(function(v) { return {
                           state: d3.max(v, function(d){ return d.state; }),
-                          val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                          val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                          stateFull: d3.max(v, function(d){ return d.state_name; })
                         }; })
                         .entries(data);
         }
@@ -680,6 +682,7 @@ function stateHover(d) {
     console.log(dictStates[d.id].value);
     displayState = dictStates[d.id].value.state;
     displayValue = dictStates[d.id].value.val;
+    displayStateName = dictStates[d.id].value.stateFull;
   } else {
     stateName = stateData.filter(function (s){
       return s.id==d.id
@@ -691,7 +694,7 @@ function stateHover(d) {
            .duration(250)
            .style("opacity", 1);
            tooltip.html(
-           "<p><strong>" + displayState + "</strong></p>" +
+           "<p><strong>" + displayStateName + "</strong></p>" +
            "<table><tbody>" +
            "<tr><td>Risk:</td><td>" + displayValue + "</td></tr></tbody></table>"
            )
