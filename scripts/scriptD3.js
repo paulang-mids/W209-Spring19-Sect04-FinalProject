@@ -112,7 +112,8 @@ function showStates() {
                         .key(function(d) { return d.id ; })
                         .rollup(function(v) { return {
                           state: d3.max(v, function(d){ return d.state; }),
-                          val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                          val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                          stateFull: d3.max(v, function(d){ return d.state_name; })
                         }; })
                         .entries(pollDataFil);
         } else {
@@ -120,7 +121,8 @@ function showStates() {
                         .key(function(d) { return d.id ; })
                         .rollup(function(v) { return {
                           state: d3.max(v, function(d){ return d.state; }),
-                          val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                          val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                          stateFull: d3.max(v, function(d){ return d.state_name; })
                         }; })
                         .entries(data);
         }
@@ -458,7 +460,7 @@ function createBar(pollData, data){
     yScale = d3.scaleBand().range([0, barHeight]).paddingInner(0.4),
     y2Scale = d3.scaleBand().range([0, barHeight]).paddingInner(0.4);
 
-    //Create x axis object
+    //Create axis objects
     xAxis = d3.axisBottom(xScale).ticks(5),
     yAxis = d3.axisLeft(yScale).tickSize(0).tickSizeOuter(0),
     yAxis2 = d3.axisLeft(y2Scale);
@@ -486,9 +488,10 @@ function createBar(pollData, data){
           .attr("transform", "translate(0," + barHeight + ")")
           .call(xAxis);
 
+    // Add the Y Axis
     focus.append("g")
           .attr("class", "y axis")
-          .attr("transform", "translate(-5, 0)")
+          .attr("transform", "translate(-1, 0)")
           .call(yAxis);
 
     barSVG.append("defs").append("clipPath")
@@ -612,7 +615,9 @@ function createBar(pollData, data){
               return yScale.domain().indexOf(d.key) === -1 ? 0 : 100;
             })
             .attr("y", function(d) {
-              return yScale(d.key)+ yScale.bandwidth()/4;
+
+              // console.log(y.bandwidth(), nD.length);
+              return yScale(d.key); //+ yScale.bandwidth()/4;
             })
             .attr("x", 0)
             .attr('width', function(d, i) {
@@ -659,20 +664,24 @@ function createBar(pollData, data){
 //Function to return tooltip for state level view
 function stateHover(d) {
   if (dictStates[d.id]) {
+    console.log(dictStates[d.id].value);
     displayState = dictStates[d.id].value.state;
     displayValue = dictStates[d.id].value.val;
+    displayStateName = dictStates[d.id].value.stateFull;
   } else {
     stateName = stateData.filter(function (s){
       return s.id==d.id
     });
+    console.log(stateName[0])
     displayState = stateName[0].state;
+    displayStateName = stateName[0].state_name;
     displayValue = "Data Not Available";
   }
    tooltip.transition()
            .duration(100)
            .style("opacity", 1);
            tooltip.html(
-           "<p><strong>" + displayState + "</strong></p>" +
+           "<p><strong>" + displayStateName + "</strong></p>" +
            "<table><tbody>" +
            "<tr><td>Risk:</td><td>" + displayValue + "</td></tr></tbody></table>"
            )
@@ -744,7 +753,8 @@ function updateRisk() {
                     .key(function(d) { return d.id ; })
                     .rollup(function(v) { return {
                     state: d3.max(v, function(d){ return d.state; }),
-                    val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                    val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                    stateFull: d3.max(v, function(d){ return d.state_name; })
                     }; })
                     .entries(data);
 
@@ -804,7 +814,8 @@ function updatePoll(pollName, data) {
                   .key(function(d) { return d.id ; })
                   .rollup(function(v) { return {
                   state: d3.max(v, function(d){ return d.state; }),
-                  val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                  val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                  stateFull: d3.max(v, function(d){ return d.state_name; })
                   }; })
                   .entries(pollDataFil);
 
@@ -859,7 +870,8 @@ function resetPoll() {
                     .key(function(d) { return d.id ; })
                     .rollup(function(v) { return {
                     state: d3.max(v, function(d){ return d.state; }),
-                    val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                    val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                    stateFull: d3.max(v, function(d){ return d.state_name; })
                     }; })
                     .entries(pollDataFil);
 
