@@ -12,11 +12,6 @@ a:active {
   text-decoration: underline;
 }
 
-/* h3 {
-  font-size: 24px;
-  color: red;
-} */
-
 .coverImage {
   background-image: url('../images/cover.jpg');
   background-attachment: fixed;
@@ -139,9 +134,6 @@ a:active {
 }
 
 .legend {
-  /* background-color: red; */
-  /* width: 500px;
-  height: 130px; */
   margin-left: 150px;
   margin-top: 5%;
 }
@@ -156,6 +148,7 @@ a:active {
   flex-direction: row;
   width: 100%;
   flex-wrap: nowrap;
+  pointer-events: all;
 }
 
 .map {
@@ -166,6 +159,7 @@ a:active {
 .bar_chart {
   margin-top: 20px;
   margin-left: -95px;
+  pointer-events: all;
 }
 
 .dropdownlabel {
@@ -270,7 +264,6 @@ a:active {
   font-size: 12pt;
 }
 
-/*  D3 Styles */
 .background {
     fill: none;
     pointer-events: all;
@@ -278,21 +271,15 @@ a:active {
 
 #states :hover{
     fill: #b3f0ff;
-    /* stroke: #057a94;
-    stroke-width: 2; */
 }
 
-/* #counties :hover{
-    fill: #b3f0ff; */
-    /* stroke: #057a94;
-    stroke-width: 0.5; */
-/* } */
+#counties :hover{
+    fill: #b3f0ff;
+ }
 
-/* .focus.mainBars :hover{ */
-    /* fill: #4dd2ff;
-    stroke: #ff6699; */
-    /* stroke-width: 0.5; */
-/* } */
+ .selected {
+   fill: #b3f0ff;
+ }
 
 .county-boundary {
     fill: #aaa;
