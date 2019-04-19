@@ -131,6 +131,26 @@ a:active {
   padding: 60px;
   padding-bottom: 0px;
 }
+
+#legendContainer{
+  display: flex;
+  flex-direction: row;
+  margin-top: -15px;
+}
+
+.legend {
+  /* background-color: red; */
+  /* width: 500px;
+  height: 130px; */
+  margin-left: 150px;
+  margin-top: 5%;
+}
+
+.legendText {
+  font: 11px sans-serif;
+  font-weight: bold;
+}
+
 #mapContainer {
   display: flex;
   flex-direction: row;
@@ -156,6 +176,7 @@ a:active {
 
 .dropdown {
   margin-bottom: 10px;
+  margin-top: -40px;
 }
 
 .state_reset {
@@ -262,10 +283,10 @@ a:active {
 }
 
 /* #counties :hover{
-    fill: #0cccf7;
-    stroke: #057a94;
-    stroke-width: 0.5;
-} */
+    fill: #b3f0ff; */
+    /* stroke: #057a94;
+    stroke-width: 0.5; */
+/* } */
 
 /* .focus.mainBars :hover{ */
     /* fill: #4dd2ff;
