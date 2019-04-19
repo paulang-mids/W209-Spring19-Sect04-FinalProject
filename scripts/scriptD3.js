@@ -470,7 +470,7 @@ function createBar(pollData, data){
     yScale = d3.scaleBand().range([0, barHeight]).paddingInner(0.4),
     y2Scale = d3.scaleBand().range([0, barHeight]).paddingInner(0.4);
 
-    //Create x axis object
+    //Create axis objects
     xAxis = d3.axisBottom(xScale).ticks(5),
     yAxis = d3.axisLeft(yScale).tickSize(0).tickSizeOuter(0),
     yAxis2 = d3.axisLeft(y2Scale);
@@ -499,6 +499,7 @@ function createBar(pollData, data){
           .attr("transform", "translate(0," + barHeight + ")")
           .call(xAxis);
 
+    // Add the Y Axis
     focus.append("g")
           .attr("class", "y axis")
           .attr("transform", "translate(-5, 0)")
