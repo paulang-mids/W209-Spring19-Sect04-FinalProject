@@ -41,7 +41,6 @@ mapSVG = d3.select('.map').append('svg')
   .attr('width', mapWidth + mapMargin.left + mapMargin.right);
 
 // Chloropleth colors
-// mapColor = d3.scaleSequential(d3.interpolateBlues);
 mapColorGreen = d3.scaleSequential(d3.interpolate("#ecf9ec", "#267326"))
     .domain([0,0.5]);
 mapColorYellow = d3.scaleSequential(d3.interpolate("#fff5cc", "#ffcc00"))
@@ -101,12 +100,11 @@ showLegend();
 function showStates() {
   stateView = true;
   var stateFile = "../data/StateData/" + selRisk + ".csv";
-  // console.log("in state: ", stateFile);
+
   d3.json("../data/us-counties.topojson", function(us) {
       d3.csv(stateFile, function(error, data) {
         if (error) throw error;
         // console.log(data);
-        // console.log(us);
         stateData = data;
 
         if (pollClick) {
@@ -115,7 +113,8 @@ function showStates() {
                         .key(function(d) { return d.id ; })
                         .rollup(function(v) { return {
                           state: d3.max(v, function(d){ return d.state; }),
-                          val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                          val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                          stateFull: d3.max(v, function(d){ return d.state_name; })
                         }; })
                         .entries(pollDataFil);
         } else {
@@ -123,7 +122,8 @@ function showStates() {
                         .key(function(d) { return d.id ; })
                         .rollup(function(v) { return {
                           state: d3.max(v, function(d){ return d.state; }),
-                          val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                          val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                          stateFull: d3.max(v, function(d){ return d.state_name; })
                         }; })
                         .entries(data);
         }
@@ -163,8 +163,6 @@ function showStates() {
                   showCounty(selStateID);
                   countyZoom();
                   d3.selectAll("button.state_reset").style("display", "inline-block");
-                  // d3.select(".state_reset").classed("state_reset", false)
-                  //     .transition().duration(50);
                   setTimeout(setCountyLoadStatus, 1000);
                 })
                 .on("mouseover", function(d){
@@ -195,10 +193,7 @@ function showStates() {
 
 //Function to update the colors for the different states in the chloropleth
 function updateStateFill(selection) {
-  // console.log("Selection: ",selection.data());
   currStateSel = selection;
-  // mapColor.domain([d3.min(stateAgg, function(d) { return d.value.val; }),
-  //               d3.max(stateAgg, function(d) { return d.value.val; })]);
   selection.transition()
            .duration(100)
            .attr("fill", function(d) {
@@ -231,7 +226,6 @@ function updateStateFill(selection) {
 function showCounty(fips) {
   stateView = false;
 	var countyFile = "../data/CountyData/" + selRisk + "/" + selRisk + selState + ".csv";
-  // console.log("in county: ", countyFile);
 
   d3.json("../data/us-counties-full.topojson", function(us) {
     d3.csv(countyFile, function(error, data) {
@@ -239,13 +233,24 @@ function showCounty(fips) {
       // console.log(data);
       countyData = data;
 
-      countyAgg = d3.nest()
-                    .key(function(d) { return d.fips; })
-                    .rollup(function(v) { return {
-                      county: d3.max(v, function(d){ return d.county; }),
-                      val: d3.mean(v, function(d) { return d.val; })
-                    }; })
-                    .entries(data);
+      if (pollClick) {
+        pollDataFil = data.filter(function (d){return d.pollutant==selPoll});
+        countyAgg = d3.nest()
+                      .key(function(d) { return d.fips; })
+                      .rollup(function(v) { return {
+                        county: d3.max(v, function(d){ return d.county; }),
+                        val: d3.mean(v, function(d) { return d.val; })
+                      }; })
+                      .entries(pollDataFil);
+      } else {
+        countyAgg = d3.nest()
+                      .key(function(d) { return d.fips; })
+                      .rollup(function(v) { return {
+                        county: d3.max(v, function(d){ return d.county; }),
+                        val: d3.mean(v, function(d) { return d.val; })
+                      }; })
+                      .entries(data);
+      }
       // console.log("County Agg: ", JSON.stringify(countyAgg));
 
       //create objects with county fip and data as key-value pairs
@@ -270,15 +275,11 @@ function showCounty(fips) {
               .call(updateCountyFill)
               .on("click", function(d){
                 if (!pollClick) {
-                  if (selCountyPath) {
-                    d3.select(selCountyPath).style("fill", selCountyColor);
-                  }
 
                   countyClick = true;
-                  selCountyPath = this;
-                  selCountyColor = d3.select(this).style("fill");
                   d3.selectAll("button.county_reset").style("display", "inline-block");
-                  d3.select(this).style("fill", "#b3f0ff");
+                  d3.select(".selected").classed("selected", false);
+                  d3.select(this).classed("selected", true);
                   countyFips = d.properties.fips;
                   selCounty = dictCounties[d.properties.fips].value.county;
                   mapTitle.text(selRiskString + " Assessment for " + selCounty + ", " + selState);
@@ -292,10 +293,6 @@ function showCounty(fips) {
                 }
               })
               .on("mouseover", function(d) {
-                if (countyLoad) {
-                  selCountyColor = d3.select(this).style("fill");
-                  d3.select(this).style("fill", "#b3f0ff");
-                }
                 countyFips = d.properties.fips;
                 countyDataFil = data.filter(function (d){return d.fips==countyFips});
                 if (!pollClick) {
@@ -306,9 +303,6 @@ function showCounty(fips) {
                 countyHover(d);
               })
               .on("mouseout", function(d) {
-                if (countyLoad) {
-                  d3.select(this).style("fill", selCountyColor);
-                }
                 if (!pollClick) {
                   d3.select(".bar_chart").select("svg").remove();
                   if (countyClick) {
@@ -334,12 +328,9 @@ function showCounty(fips) {
 //Function to update the colors for the different counties in the chloropleth
 function updateCountyFill(selection) {
   currCountySel = selection;
-  // mapColor.domain([d3.min(countyAgg, function(d) { return d.value.val; }),
-  //               d3.max(countyAgg, function(d) { return d.value.val; })]);
   selection.transition()
            .duration(100)
            .attr("fill", function(d) {
-             // console.log("county d: ",d, parseInt(d.properties.fips), dictCounties[parseInt(d.properties.fips)]);
              countyObj = dictCounties[d.properties.fips];
              if (countyObj) {
                 var value = countyObj.value.val;
@@ -376,7 +367,6 @@ function countyZoom() {
         var scale = .8 / Math.max(dx / mapWidth, dy / mapHeight),
         translate = [mapWidth / 2 - scale * x, (mapHeight / 2 - scale * y) + (mapHeight * .06)];
       }
-        // console.log(selState, translate);
 
   mapG.transition()
       .duration(1000)
@@ -439,7 +429,7 @@ function createBar(pollData, data){
                 .attr("width", barWidth + barMargin.left + barMargin.right + barWidth2 + barMargin2.left + barMargin2.right)
                 .attr("height", barHeight + barMargin.top + barMargin.bottom);
 
-    //Chloropleth Title
+    //Bar Title
     barTitle = barSVG.append('text')
                       .attr("fill", "#2e3d49")
                       .attr("class", "chartTitle")
@@ -471,13 +461,12 @@ function createBar(pollData, data){
     yScale = d3.scaleBand().range([0, barHeight]).paddingInner(0.4),
     y2Scale = d3.scaleBand().range([0, barHeight]).paddingInner(0.4);
 
-    //Create x axis object
+    //Create axis objects
     xAxis = d3.axisBottom(xScale).ticks(5),
     yAxis = d3.axisLeft(yScale).tickSize(0).tickSizeOuter(0),
     yAxis2 = d3.axisLeft(y2Scale);
 
     pollData.sort(function(a,b) { return b.value.val - a.value.val; });
-    // console.log(pollData);
 
     xScale.domain([0, d3.max(pollData, function(d) { return d.value.val; })]);
     x2Scale.domain([0, d3.max(pollData, function(d) { return d.value.val; })]);
@@ -500,9 +489,10 @@ function createBar(pollData, data){
           .attr("transform", "translate(0," + barHeight + ")")
           .call(xAxis);
 
+    // Add the Y Axis
     focus.append("g")
           .attr("class", "y axis")
-          .attr("transform", "translate(-5, 0)")
+          .attr("transform", "translate(-1, 0)")
           .call(yAxis);
 
     barSVG.append("defs").append("clipPath")
@@ -515,7 +505,7 @@ function createBar(pollData, data){
 
     var rects = focus_group.selectAll('rect').data(pollData);
 
-    //********* Bar Chart 1 ****************
+    //Bar Chart 1
     var newRects1 = rects.enter();
 
     newRects1.append('rect')
@@ -532,7 +522,6 @@ function createBar(pollData, data){
               .attr('opacity', 0.85)
               .style('fill', '#0086b3')
               .style('stroke', '#0086b3')
-              // .attr("text", "test")
               .on("click", function(d) {
                 if (!countyClick) {
                   if (pollClick) {
@@ -581,7 +570,7 @@ function createBar(pollData, data){
 
     var brushRects = focus_group.selectAll('rect').data(pollData);
 
-    //********* Brush Bar Chart ****************
+    //Brush Bar Chart
     var brushRects1 = brushRects.enter();
 
     brushRects1.append('rect')
@@ -627,8 +616,9 @@ function createBar(pollData, data){
               return yScale.domain().indexOf(d.key) === -1 ? 0 : 100;
             })
             .attr("y", function(d) {
+
               // console.log(y.bandwidth(), nD.length);
-              return yScale(d.key)+ yScale.bandwidth()/4;
+              return yScale(d.key); //+ yScale.bandwidth()/4;
             })
             .attr("x", 0)
             .attr('width', function(d, i) {
@@ -645,10 +635,8 @@ function createBar(pollData, data){
 
       //Find the new max of the bars to update the x scale
       var newMaxXScale = d3.max(pollData, function(d) {
-        // console.log(d.key, nD.indexOf(d.key), d.value.val);
         return nD.indexOf(d.key) > -1 ? d.value.val : 0;
       });
-      // console.log(nD, newMaxXScale);
       xScale.domain([0, newMaxXScale]);
 
       //Update the x axis of the big chart
@@ -677,27 +665,29 @@ function createBar(pollData, data){
 //Function to return tooltip for state level view
 function stateHover(d) {
   if (dictStates[d.id]) {
+    console.log(dictStates[d.id].value);
     displayState = dictStates[d.id].value.state;
     displayValue = dictStates[d.id].value.val;
+    displayStateName = dictStates[d.id].value.stateFull;
   } else {
     stateName = stateData.filter(function (s){
       return s.id==d.id
     });
+    console.log(stateName[0])
     displayState = stateName[0].state;
+    displayStateName = stateName[0].state_name;
     displayValue = "Data Not Available";
   }
    tooltip.transition()
-           .duration(250)
+           .duration(100)
            .style("opacity", 1);
            tooltip.html(
-           "<p><strong>" + displayState + "</strong></p>" +
+           "<p><strong>" + displayStateName + "</strong></p>" +
            "<table><tbody>" +
            "<tr><td>Risk:</td><td>" + displayValue + "</td></tr></tbody></table>"
            )
            .style("left", (d3.event.pageX + 15) + "px")
            .style("top", (d3.event.pageY - 28) + "px");
-
-      // console.log(d.id, value, dictStates[d.id].value.state);
 }
 
 //Function to return tooltip for state level view
@@ -713,7 +703,7 @@ function countyHover(d) {
     displayValue = "Data Not Available";
   }
    tooltip.transition()
-           .duration(250)
+           .duration(100)
            .style("opacity", 1);
            tooltip.html(
            "<p><strong>" + displayCounty + ", " + selState + "</strong></p>" +
@@ -733,22 +723,20 @@ function hideTip() {
 
 //Function to return tooltip for main bar chart
 function pollHover(d) {
-  // console.log("pollhover: ", d);
-    tooltip.transition()
-            .duration(550)
-            .style("opacity", 1);
-    tooltip.html(
-                "<p><strong>" + d.key + "</strong></p>" +
-                "<table><tbody>" +
-                "<tr><td>Pollutant Level:</td><td>" + d.value.val + "</td></tr></tbody></table>"
-            )
-            .style("left", (d3.event.pageX + 15) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
+  tooltip.transition()
+          .duration(100)
+          .style("opacity", 1);
+  tooltip.html(
+              "<p><strong>" + d.key + "</strong></p>" +
+              "<table><tbody>" +
+              "<tr><td>Pollutant Level:</td><td>" + d.value.val + "</td></tr></tbody></table>"
+          )
+          .style("left", (d3.event.pageX + 15) + "px")
+          .style("top", (d3.event.pageY - 28) + "px");
 }
 
 //Function to update vizualizations based on drop down selection
 function updateRisk() {
-  // console.log("In Update");
   selRisk = this.value;
   selRiskString = this[this.selectedIndex].text;
 
@@ -761,26 +749,23 @@ function updateRisk() {
       mapTitle.text(selRiskString + ' Assessment');
     }
   	var riskFile = "../data/StateData/" + selRisk + ".csv";
-    // console.log(riskFile);
+
     d3.csv(riskFile, function(error, data) {
       if (error) throw error;
-      // console.log(data);
       stateData = data;
       stateAgg = d3.nest()
                     .key(function(d) { return d.id ; })
                     .rollup(function(v) { return {
                     state: d3.max(v, function(d){ return d.state; }),
-                    val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                    val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                    stateFull: d3.max(v, function(d){ return d.state_name; })
                     }; })
                     .entries(data);
-      // console.log(JSON.stringify(stateAgg));
-      //
-      //create objects with state id and data as key-value pairs
+
       dictStates = {};
       stateAgg.forEach(function(d) {
         dictStates[d.key] = d;
       });
-      // console.log(dictStates);
       d3.select(".bar_chart").select("svg").remove();
       getPollData(data);
       createBar(pollData, data);
@@ -801,10 +786,9 @@ function updateRisk() {
       }
     }
   	var riskFile = "../data/CountyData/"  + selRisk + "/" + selRisk + selState + ".csv";
-    // console.log(riskFile);
+
     d3.csv(riskFile, function(error, data) {
       if (error) throw error;
-      // console.log(data);
       countyData = data;
       countyAgg = d3.nest()
                     .key(function(d) { return d.fips; })
@@ -813,14 +797,11 @@ function updateRisk() {
                       val: d3.mean(v, function(d) { return d.val; })
                     }; })
                     .entries(data);
-      // console.log(JSON.stringify(countyAgg));
-      //
-      //create objects with state id and data as key-value pairs
+
       dictCounties = {};
       countyAgg.forEach(function(d) {
           dictCounties[d.key] = d;
       });
-      // console.log(dictCounties);
       d3.select(".bar_chart").select("svg").remove();
       getPollData(data);
       createBar(pollData, data);
@@ -856,26 +837,21 @@ function updateRisk() {
 
 //Function to update chloropleth based on pollutant selection
 function updatePoll(pollName, data) {
-  // console.log("In Poll Update: ", pollName);
-	// console.log(data);
-  // pollDataFil = data.filter(function (d){return d.pollutant==pollName});
   if (stateView) {
     pollDataFil = stateData.filter(function (d){return d.pollutant==pollName});
     stateAgg = d3.nest()
                   .key(function(d) { return d.id ; })
                   .rollup(function(v) { return {
                   state: d3.max(v, function(d){ return d.state; }),
-                  val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                  val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                  stateFull: d3.max(v, function(d){ return d.state_name; })
                   }; })
                   .entries(pollDataFil);
-    // console.log(JSON.stringify(stateAgg));
-    //
-    //create objects with state id and data as key-value pairs
+
     dictStates = {};
     stateAgg.forEach(function(d) {
       dictStates[d.key] = d;
     });
-    // console.log(dictStates);
     stateMap.call(updateStateFill(currStateSel));
   } else {
     pollDataFil = countyData.filter(function (d){return d.pollutant==pollName});
@@ -886,14 +862,11 @@ function updatePoll(pollName, data) {
                     val: d3.mean(v, function(d) { return d.val; })
                   }; })
                   .entries(pollDataFil);
-    // console.log(JSON.stringify(countyAgg));
-    //
-    //create objects with state id and data as key-value pairs
+
     dictCounties = {};
     countyAgg.forEach(function(d) {
         dictCounties[d.key] = d;
     });
-    // console.log(dictCounties);
     countyMap.call(updateCountyFill(currCountySel));
   }
 }
@@ -926,17 +899,15 @@ function resetPoll() {
                     .key(function(d) { return d.id ; })
                     .rollup(function(v) { return {
                     state: d3.max(v, function(d){ return d.state; }),
-                    val: d3.mean(v, function(d) { return parseFloat(d.val); })
+                    val: d3.mean(v, function(d) { return parseFloat(d.val); }),
+                    stateFull: d3.max(v, function(d){ return d.state_name; })
                     }; })
                     .entries(pollDataFil);
-      // console.log(JSON.stringify(stateAgg));
-      //
-      //create objects with state id and data as key-value pairs
+
       dictStates = {};
       stateAgg.forEach(function(d) {
         dictStates[d.key] = d;
       });
-      // console.log(dictStates);
       stateMap.call(updateStateFill(currStateSel));
     } else {
       if (pollClick) {
@@ -951,18 +922,16 @@ function resetPoll() {
                       val: d3.mean(v, function(d) { return d.val; })
                     }; })
                     .entries(pollDataFil);
-      // console.log(JSON.stringify(countyAgg));
-      //
-      //create objects with state id and data as key-value pairs
+
       dictCounties = {};
       countyAgg.forEach(function(d) {
           dictCounties[d.key] = d;
     });
-    // console.log(dictCounties);
     countyMap.call(updateCountyFill(currCountySel));
   }
 }
 
+//Function for creating the legend and associated text
 function showLegend() {
   // Legend
   legendSVG = d3.select(".legend").append("svg")

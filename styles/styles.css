@@ -12,11 +12,6 @@ a:active {
   text-decoration: underline;
 }
 
-/* h3 {
-  font-size: 24px;
-  color: red;
-} */
-
 .coverImage {
   background-image: url('../images/cover.jpg');
   background-attachment: fixed;
@@ -127,7 +122,8 @@ a:active {
 }
 .visualTitle {
   color: #2e3d49;
-  font-size: 35px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 30px;
   padding: 60px;
   padding-bottom: 0px;
 }
@@ -204,6 +200,7 @@ font-size: 14px;
   flex-direction: row;
   width: 100%;
   flex-wrap: nowrap;
+  pointer-events: all;
 }
 
 .map {
@@ -214,6 +211,7 @@ font-size: 14px;
 .bar_chart {
   margin-top: 20px;
   margin-left: -95px;
+  pointer-events: all;
 }
 
 .dropdownlabel {
@@ -281,7 +279,7 @@ font-size: 14px;
   width: 300px;
   height: auto;
   margin: 2%;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: #d9d9d9;
   color: #b3003b;
   border: 1px solid #e6e6e6;
   border-radius: 8px;
@@ -318,7 +316,6 @@ font-size: 14px;
   font-size: 12pt;
 }
 
-/*  D3 Styles */
 .background {
     fill: none;
     pointer-events: all;
@@ -326,21 +323,21 @@ font-size: 14px;
 
 #states :hover{
     fill: #b3f0ff;
-    /* stroke: #057a94;
-    stroke-width: 2; */
 }
 
-/* #counties :hover{
-    fill: #b3f0ff; */
-    /* stroke: #057a94;
-    stroke-width: 0.5; */
-/* } */
+#counties :hover{
+    fill: #b3f0ff;
+ }
 
-/* .focus.mainBars :hover{ */
-    /* fill: #4dd2ff;
-    stroke: #ff6699; */
-    /* stroke-width: 0.5; */
-/* } */
+ .selected {
+   fill: #b3f0ff;
+ }
+
+.focus text {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+}
 
 .county-boundary {
     fill: #aaa;
@@ -349,8 +346,10 @@ font-size: 14px;
 }
 
 .chartTitle {
+  font-family: Georgia, 'Times New Roman', Times, serif;
   font-weight: bold;
-  font-style: italic;
+  font-style: normal;
+  font-size: 16px;
 }
 
 .tooltip {
