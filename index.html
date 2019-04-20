@@ -28,7 +28,10 @@
     <section id="introduction">
       <h1 class="introTitle">Introduction</h1>
       <p class="introDetails">
-        In 2010, 1 in 35 deaths in the U.S. were attributed to illness caused by air pollution. Since 1990, air pollution has been identified by standard bearer agencies in the Center for Disease Control and Prevention (CDC) and the Environmental Protection Agency (EPA) as a real health issue to be understood and addressed. The EPA compiles an exhaustive list of pollutant emissions throughout the United States every three years in the National Emissions Inventory Report (NEI). This NEI data collected from 2014 has been made available to civilians in publicly hosted access tables and a summary report, but the mode of dessimination lacks visibility and usability for the average American.
+        In 2010, 1 in 35 deaths in the U.S. were attributed to illness caused by air pollution. Since 1990, air pollution has been identified by standard bearer agencies in the Center for Disease Control and Prevention (CDC) and the Environmental Protection Agency (EPA) as a real health issue to be understood and addressed.
+        The EPA compiles an exhaustive list of pollutant emissions throughout the United States every three years in the National Emissions Inventory Report (NEI). This NEI data collected from 2014 has been made available to civilians in publicly hosted access tables and a summary report, but the mode of dessemination lacks visibility and usability for the average American.
+      </p>
+      <p class="introDetails">
         We want this to change.
       </p>
     </section>
@@ -40,39 +43,30 @@
           <hr />
           <ul>
             <li>
-              Environmental Protection Agency has over 20 year project to assess
-              risk associated with pollutants that are emitted across the U.S.
+              The Environmental Protection Agency has a decades long project to assess
+              risks associated with air pollutants that are emitted across the U.S. The EPA then reports this in the National Emissions Inventory Report.
             </li>
             <li>
-              Includes assessment of long term effects of pollutants on individuals’ health.
+              This NEI assessment includes indications of long term effects of pollutants on individuals’ health.
             </li>
             <li>
-              Prior to 2000, data was only available to regulators and policy makers.
+              Prior to 2000, data was only available to regulators and policy makers. Now it is available publicly but not easily accessible.
             </li>
             <li>
-              Since 2000, data is available to public but is not easily accessible
-              and consumable - multiple Access tables and very clunky NEI summary report.
+              Lindsey et al developed prototype solution combining data for one year and making accessible via API.
+              We've build our project on top of data generated from their work.
             </li>
-            <li>
-              Lindsey et al developed prototype solution combining data for one
-              year and making accessible via API*
-            </li>
-            </ul>
+          </ul>
         </div>
         <div class="conceptDivs">
-          <h3>Objective</h3>
+          <h3>Risks and Pollutants</h3>
           <hr />
           <ul>
             <li>
-              Build upon work of Lindsey et al by creating interactive visualization
-              allowing the audience to easily explore and gain actionable insights from
-              the pollutant/risk data.
+              Our visualization utilizes a numerical assessment of the user selected risk. This value is taken directly from the NEI report, and EPA defines this value as "The likelihood that a given exposure or series of exposures [to a pollutant] may have damaged or will damage the health of individuals". Further information on this risk assessment variable can be found <a href=https://www.epa.gov/risk/human-health-risk-assessment>here</a>.
             </li>
             <li>
-              Create an intuitive vizualization that anyone can use to view information about states or counties they are interested in. 
-            </li>
-            <li>
-              Allow for multiple filtering options to provide flexibility.
+              The various pollutants contributing to each risk index can be found in the bar chart to the right of the US map. These pollutants have been identified by the EPA as being known to cause cancer or other serious health risks. For more information about these pollutants see <a href="https://www.epa.gov/haps">here</a> or <a href="https://www.epa.gov/haps/initial-list-hazardous-air-pollutants-modifications">here</a>.
             </li>
           </ul>
         </div>
@@ -187,10 +181,8 @@
           <h3>Goal</h3>
           <hr />
           <p>
-            Create a publicly accessible interactive map that provides a simple and effective mode for individuals to look up location specific air pollution information and its associated risk level.
-
-            Increase overall awareness of air pollution outside of mainstream perception of carbon emission as the only threat to US air quality and population health.
-            </p>
+            We hope that our project increases the American populace's awareness of the dangers of air pollution in their home, their neighborhood and throughout the rest of the country. It's become increasingly apparent that there are not a couple of pollutants that are contributing to our decreasing air quality, but hundreds, and it's up to us to stop it.
+          </p>
         </div>
         <div class="aboutDetails">
           <h3>Audience</h3>
@@ -208,7 +200,7 @@
           <ul>
             <li><a href="https://www.epa.gov/air-emissions-inventories/2014-national-emissions-inventory-nei-data">2014 NEI Portal</a></li>
             <li><a href="https://www.epa.gov/sites/production/files/2017-04/documents/2014neiv1_profile_final_april182017.pdf">2014 NEI Emissions Summary</a></li>
-            <li><a href="https://www.epa.gov/p2">Pollution Prevention</a>></li>
+            <li><a href="https://www.epa.gov/p2">Pollution Prevention</a></li>
             <li><a href="https://www3.epa.gov/region1/airquality/reducepollution.html">Further Actions You Can Take to Reduce Air Pollution</a></li>
             </ul>
         </div>
