@@ -123,9 +123,10 @@ a:active {
 .visualTitle {
   color: #2e3d49;
   font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 30px;
+  font-size: 20px;
   padding: 60px;
   padding-bottom: 0px;
+  width: 600px;
 }
 
 #legendContainer{
@@ -138,7 +139,7 @@ a:active {
 #definitions{
 
 margin-left: 100px;
-margin-top: 5%; 
+margin-top: 5%;
 font-size: 14px;
 }
 */
@@ -159,11 +160,13 @@ font-size: 14px;
 
 /* Modal Content/Box */
 .modal-content {
-  background-color: #fefefe;
+  background-color: #e6faff;
   margin: 15% auto; /* 15% from the top and centered */
-  padding: 20px;
+  padding: 5px 20px 20px 30px;
   border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
+  border-radius: 10px;
+  line-height: 25px;
+  width: 40%; /* Could be more or less, depending on screen size */
 }
 
 /* The Close Button */
@@ -186,7 +189,7 @@ font-size: 14px;
   /* background-color: red; */
   /* width: 500px;
   height: 130px; */
-  margin-left: 120px;
+  /* margin-left: 120px; */
   margin-top: 5%;
 }
 
@@ -323,10 +326,12 @@ font-size: 14px;
 
 #states :hover{
     fill: #b3f0ff;
+    cursor: pointer;
 }
 
 #counties :hover{
     fill: #b3f0ff;
+    cursor: pointer;
  }
 
  .selected {
@@ -338,6 +343,14 @@ font-size: 14px;
   font-size: 11px;
   font-weight: bold;
 }
+
+.focus {
+  cursor: pointer;
+}
+
+/* .focus .mainBars :hover{
+  fill: red;
+} */
 
 .county-boundary {
     fill: #aaa;
@@ -383,6 +396,12 @@ font-size: 14px;
   pointer-events: all;
 }
 
+@media only screen and (min-width: 751px) and (max-width: 1200px) {
+  .dropdown {
+    margin-top: 0;
+  }
+}
+
 @media only screen and (max-width: 750px) {
   body {
     width: 100%;
@@ -416,12 +435,17 @@ font-size: 14px;
   #visualization {
     height: auto;
   }
+  #legendContainer{
+    flex-direction: column;
+    justify-content: center;
+  }
   #mapContainer {
     flex-wrap: wrap;
     justify-content: center;
   }
   .dropdown {
     width: 80%;
+    margin-top: 0;
   }
   #about {
     height:auto;
