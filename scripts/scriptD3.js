@@ -752,13 +752,31 @@ function updateRisk() {
   selRisk = this.value;
   selRiskString = this[this.selectedIndex].text;
 
+  var modal = document.getElementById('myModal');
 
   // bring up defintion
   d3.json("../data/definitions.json", function(error, data){
     //var definition = data.selRisk
     console.log(data[0][selRisk])
-    document.getElementById('definitions').innerHTML = '</p>'+data[0][selRisk]+'</p>';
-  });
+    var definitions = document.getElementById('definitions').innerHTML = '</p>'+data[0][selRisk]+'</p>';
+    
+    modal.style.display = "block";
+
+    span.onclick = function() {
+    modal.style.display = "none";
+    }
+
+     });
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+
+
+ 
 
 
 
