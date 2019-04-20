@@ -836,7 +836,7 @@ function updateRisk() {
     var definitions = document.getElementById('definitions').innerHTML = '</p>'+data[0][selRisk]+'</p>';
     
     modal.style.display = "block";
-
+    var span = document.getElementsByClassName("close")[0];
     span.onclick = function() {
     modal.style.display = "none";
     }
