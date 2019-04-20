@@ -754,32 +754,6 @@ function updateRisk() {
 
   var modal = document.getElementById('myModal');
 
-  // bring up defintion
-  d3.json("../data/definitions.json", function(error, data){
-    //var definition = data.selRisk
-    console.log(data[0][selRisk])
-    var definitions = document.getElementById('definitions').innerHTML = '</p>'+data[0][selRisk]+'</p>';
-    
-    modal.style.display = "block";
-
-    span.onclick = function() {
-    modal.style.display = "none";
-    }
-
-     });
-
-  // When the user clicks anywhere outside of the modal, close it
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  };
-
-
- 
-
-
-
   if (stateView) {
     if (pollClick) {
       mapTitle.text(selRiskString + ' Assessment for ' + selPoll);
@@ -853,6 +827,31 @@ function updateRisk() {
       countyMap.call(updateCountyFill(currCountySel));
     });
   }
+
+
+  // bring up definition
+  d3.json("../data/definitions.json", function(error, data){
+    //var definition = data.selRisk
+    console.log(data[0][selRisk])
+    var definitions = document.getElementById('definitions').innerHTML = '</p>'+data[0][selRisk]+'</p>';
+    
+    modal.style.display = "block";
+
+    span.onclick = function() {
+    modal.style.display = "none";
+    }
+
+     });
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+
+
+
 }
 
 //Function to update chloropleth based on pollutant selection
