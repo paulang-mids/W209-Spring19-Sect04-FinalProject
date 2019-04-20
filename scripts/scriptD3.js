@@ -1,3 +1,4 @@
+
 // Chloropleth Variables
 var mapMargin = {top: 15, bottom: 10, left: 10, right:0}
     , mapWidth = 850
@@ -750,6 +751,17 @@ function updateRisk() {
   // console.log("In Update");
   selRisk = this.value;
   selRiskString = this[this.selectedIndex].text;
+
+
+  // bring up defintion
+  d3.json("../data/definitions.json", function(error, data){
+    //var definition = data.selRisk
+    console.log(data[0][selRisk])
+    document.getElementById('definitions').innerHTML = '</p>'+data[0][selRisk]+'</p>';
+  });
+
+
+
   if (stateView) {
     if (pollClick) {
       mapTitle.text(selRiskString + ' Assessment for ' + selPoll);

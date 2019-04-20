@@ -138,11 +138,19 @@ a:active {
   margin-top: -15px;
 }
 
+
+#definitions{
+
+margin-left: 100px;
+margin-top: 5%; 
+font-size: 12px;
+}
+
 .legend {
   /* background-color: red; */
   /* width: 500px;
   height: 130px; */
-  margin-left: 150px;
+  margin-left: 10px;
   margin-top: 5%;
 }
 
